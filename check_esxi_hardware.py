@@ -34,6 +34,7 @@
 # Copyright (c) 2011 Bertrand Jomin
 # Copyright (c) 2011 Ian Chard
 # Copyright (c) 2012 Craig Hart
+# Copyright (c) 2013 Carl R. Friend
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -193,6 +194,10 @@
 #@ Date   : 20130424
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Another workaround for Dell systems "System Board 1 LCD Cable Pres 0: Connected"
+#@---------------------------------------------------
+#@ Date   : 20130702
+#@ Author : Carl R. Friend
+#@ Reason : Improving wrong authentication timeout and exit UNKNOWN
 #@---------------------------------------------------
 
 import sys
@@ -535,18 +540,31 @@ ExitMsg = ""
 # if vendor is specified as 'auto', try to get vendor from CIM
 # note: the default vendor is 'unknown'
 if vendor=='auto':
-  c=wbemclient.EnumerateInstances('CIM_Chassis')
-  man=c[0][u'Manufacturer']
-  if re.match("Dell",man):
-    vendor="dell"
-  elif re.match("HP",man):
-    vendor="hp"
-  elif re.match("IBM",man):
-    vendor="ibm"
-  elif re.match("Intel",man):
-    vendor="intel"
+  try:
+    c=wbemclient.EnumerateInstances('CIM_Chassis')
+  except pywbem.cim_operations.CIMError,args:
+    if ( args[1].find('Socket error') >= 0 ):
+      print "UNKNOWN: %s" %args
+      sys.exit (ExitUnknown)
+    else:
+      verboseoutput("Unknown CIM Error: %s" % args)
+  except pywbem.cim_http.AuthError,arg:
+    verboseoutput("Global exit set to UNKNOWN")
+    GlobalStatus = ExitUnknown
+    print "UNKNOWN: Authentication Error"
+    sys.exit (GlobalStatus)
   else:
-    vendor='unknown'
+    man=c[0][u'Manufacturer']
+    if re.match("Dell",man):
+      vendor="dell"
+    elif re.match("HP",man):
+      vendor="hp"
+    elif re.match("IBM",man):
+      vendor="ibm"
+    elif re.match("Intel",man):
+      vendor="intel"
+    else:
+      vendor='unknown'
 
 for classe in ClassesToCheck :
   verboseoutput("Check classe "+classe)
@@ -559,9 +577,10 @@ for classe in ClassesToCheck :
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except pywbem.cim_http.AuthError,arg:
-    verboseoutput("Global exit set to CRITICAL")
+    verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitCritical
-    ExitMsg = " : Authentication Error! "
+    print "UNKNOWN: Authentication Error"
+    sys.exit (GlobalStatus)
   else:
     # GlobalStatus = ExitOK #ARR
     for instance in instance_list :
