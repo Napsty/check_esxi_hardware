@@ -207,7 +207,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20130424'
+version = '20130702'
 
 NS = 'root/cimv2'
 
