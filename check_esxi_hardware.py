@@ -377,7 +377,7 @@ def urlised_server_info(vendor, country, server_info):
     if (server_info is not None) :
       p=re.match('(.*)PowerEdge (.*) (.*)',server_info)
       if (p is not None) :
-        md=p.group(3)
+        md=p.group(2)
         if md == 'R210 II':
           md='r210-2'
         md=md.lower()
