@@ -377,12 +377,10 @@ def urlised_server_info(vendor, country, server_info):
     if (server_info is not None) :
       p=re.match('(.*)PowerEdge (.*) (.*)',server_info)
       if (p is not None) :
-        modelname=p.group(3)
-        if modelname == 'R210 II':
+        md=p.group(3)
+        if md == 'R210 II':
           md='r210-2'
-        else:
-          md=p.group(2)
-          md=md.lower()
+        md=md.lower()
         server_info = p.group(1) + '<a href="' + du + md + '#ui-tabs-4">PowerEdge ' + p.group(2)+'</a> ' + p.group(3)
   elif vendor == 'hp':
     return server_info
