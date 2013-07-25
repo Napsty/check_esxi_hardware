@@ -199,6 +199,10 @@
 #@ Author : Carl R. Friend
 #@ Reason : Improving wrong authentication timeout and exit UNKNOWN
 #@---------------------------------------------------
+#@ Date   : 20130725
+#@ Author : Phil Randal (phil.randal@gmail.com)
+#@ Reason : Fix lookup of warranty info for Dell
+#@---------------------------------------------------
 
 import sys
 import time
@@ -207,7 +211,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20130702'
+version = '20130725'
 
 NS = 'root/cimv2'
 
@@ -307,18 +311,79 @@ ExitWarning = 1
 ExitCritical = 2
 ExitUnknown = 3
 
+def dell_country(country):
+  if country == 'at':  # Austria
+    return 'at/de/'
+  if country == 'be':  # Belgium
+    return 'be/nl/'
+  if country == 'cz':  # Czech Republic
+    return 'cz/cs/'
+  if country == 'de':  # Germany
+    return 'de/de/'
+  if country == 'dk':  # Denmark
+    return 'dk/da/'
+  if country == 'es':  # Spain
+    return 'es/es/'
+  if country == 'fi':  # Finland
+    return 'fi/fi/'
+  if country == 'fr':  # France
+    return 'fr/fr/'
+  if country == 'gr':  # Greece
+    return 'gr/en/'
+  if country == 'it':  # Italy
+    return 'it/it/'
+  if country == 'il':  # Israel
+    return 'il/en/'
+  if country == 'me':  # Middle East
+    return 'me/en/'
+  if country == 'no':  # Norway
+    return 'no/no/'
+  if country == 'nl':  # The Netherlands
+    return 'nl/nl/'
+  if country == 'pl':  # Poland
+    return 'pl/pl/'
+  if country == 'pt':  # Portugal
+    return 'pt/en/'
+  if country == 'ru':  # Russia
+    return 'ru/ru/'
+  if country == 'se':  # Sweden
+    return 'se/sv/'
+  if country == 'uk':  # United Kingdom
+    return 'uk/en/'
+  if country == 'za':  # South Africa
+    return 'za/en/'
+  if country == 'br':  # Brazil
+    return 'br/pt/'
+  if country == 'ca':  # Canada
+    return 'ca/en/'
+  if country == 'mx':  # Mexico
+    return 'mx/es/'
+  if country == 'us':  # United States
+    return 'us/en/'
+  if country == 'au':  # Australia
+    return 'au/en/'
+  if country == 'cn':  # China
+    return 'cn/zh/'
+  if country == 'in':  # India
+    return 'in/en/'
+  # default
+  return 'en/us/'
+
 def urlised_server_info(vendor, country, server_info):
   #server_inf = server_info
   if vendor == 'dell' :
     # Dell support URLs (idea and tables borrowed from check_openmanage)
-    du = 'http://support.dell.com/support/edocs/systems/pe'
+    du = 'http://www.dell.com/support/troubleshooting/' + dell_country(country) + '19/Product/poweredge-'
     if (server_info is not None) :
       p=re.match('(.*)PowerEdge (.*) (.*)',server_info)
       if (p is not None) :
-        md=p.group(2)
-        if (re.match('M',md)) :
-          md = 'm'
-        server_info = p.group(1) + '<a href="' + du + md + '/">PowerEdge ' + p.group(2)+'</a> ' + p.group(3)
+        modelname=p.group(3)
+        if modelname == 'R210 II':
+          md='r210-2'
+        else:
+          md=p.group(2)
+          md=md.lower()
+        server_info = p.group(1) + '<a href="' + du + md + '#ui-tabs-4">PowerEdge ' + p.group(2)+'</a> ' + p.group(3)
   elif vendor == 'hp':
     return server_info
   elif vendor == 'ibm':
@@ -331,50 +396,18 @@ def urlised_server_info(vendor, country, server_info):
 # ----------------------------------------------------------------------
 
 def system_tag_url(vendor,country):
-  url = {'xx':''}
   if vendor == 'dell':
     # Dell support sites
     supportsite = 'http://www.dell.com/support/troubleshooting/'
     dellsuffix = 'nodhs1/Index?t=warranty&servicetag='
 
     # warranty URLs for different country codes
-    # EMEA
-    url['at'] = supportsite + 'at/de/' + dellsuffix  # Austria
-    url['be'] = supportsite + 'be/nl/' + dellsuffix  # Belgium
-    url['cz'] = supportsite + 'cz/cs/' + dellsuffix  # Czech Republic
-    url['de'] = supportsite + 'de/de/' + dellsuffix  # Germany
-    url['dk'] = supportsite + 'dk/da/' + dellsuffix  # Denmark
-    url['es'] = supportsite + 'es/es/' + dellsuffix  # Spain
-    url['fi'] = supportsite + 'fi/fi/' + dellsuffix  # Finland
-    url['fr'] = supportsite + 'fr/fr/' + dellsuffix  # France
-    url['gr'] = supportsite + 'gr/en/' + dellsuffix  # Greece
-    url['it'] = supportsite + 'it/it/' + dellsuffix  # Italy
-    url['il'] = supportsite + 'il/en/' + dellsuffix  # Israel
-    url['me'] = supportsite + 'me/en/' + dellsuffix  # Middle East
-    url['no'] = supportsite + 'no/no/' + dellsuffix  # Norway
-    url['nl'] = supportsite + 'nl/nl/' + dellsuffix  # The Netherlands
-    url['pl'] = supportsite + 'pl/pl/' + dellsuffix  # Poland
-    url['pt'] = supportsite + 'pt/en/' + dellsuffix  # Portugal
-    url['ru'] = supportsite + 'ru/ru/' + dellsuffix  # Russia
-    url['se'] = supportsite + 'se/sv/' + dellsuffix  # Sweden
-    url['uk'] = supportsite + 'uk/en/' + dellsuffix  # United Kingdom
-    url['za'] = supportsite + 'za/en/' + dellsuffix  # South Africa
-    # America
-    url['br'] = supportsite + 'br/pt/' + dellsuffix  # Brazil
-    url['ca'] = supportsite + 'ca/en/' + dellsuffix  # Canada
-    url['mx'] = supportsite + 'mx/es/' + dellsuffix  # Mexico
-    url['us'] = supportsite + 'us/en/' + dellsuffix  # USA
-    # Asia/Pacific
-    url['au'] = supportsite + 'au/en/' + dellsuffix  # Australia
-    url['cn'] = supportsite + 'cn/zh/' + dellsuffix  # China
-    url['in'] = supportsite + 'in/en/' + dellsuffix  # India
-    # default fallback
-    url['xx'] = supportsite + 'us/en/' + dellsuffix  # default
+    return supportsite + dell_country(country) + dellsuffix
   # elif vendor == 'hp':
   # elif vendor == 'ibm':
   # elif vendor == 'intel':
 
-  return url.get(country,url['xx'])
+  return ''
 
 # ----------------------------------------------------------------------
 
