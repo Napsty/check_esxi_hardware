@@ -205,7 +205,7 @@
 #@---------------------------------------------------
 #@ Date   : 20140319
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
-#@ Reason : Another workaround for Dell systems "System Board 1 VGA Cable Pres 0: Connected"
+#@ Reason : Another two workarounds for Dell systems (VGA Cable Pres 0, Add-in Card 4 PEM Presence 0)
 #@---------------------------------------------------
 
 import sys
@@ -762,6 +762,7 @@ for classe in ClassesToCheck :
         ignore_list.append("System Board 1 Riser Config Err 0: Connected")
         ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
 	ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
+	ignore_list.append("Add-in Card 4 PEM Presence 0: Connected")
         if instance['OperationalStatus'] is not None :
           elementStatus = instance['OperationalStatus'][0]
           verboseoutput("    Element Op Status = %d" % elementStatus)
