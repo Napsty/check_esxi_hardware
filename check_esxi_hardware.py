@@ -24,7 +24,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2013 Claudio Kuenzler
+# Copyright (c) 2010-2014 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -202,6 +202,10 @@
 #@ Date   : 20130725
 #@ Author : Phil Randal (phil.randal@gmail.com)
 #@ Reason : Fix lookup of warranty info for Dell
+#@---------------------------------------------------
+#@ Date   : 20140319
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Another workaround for Dell systems "System Board 1 VGA Cable Pres 0: Connected"
 #@---------------------------------------------------
 
 import sys
@@ -757,6 +761,7 @@ for classe in ClassesToCheck :
         # Added 20121027 As long as Dell doesnt correct these CIM elements return code we have to ignore it
         ignore_list.append("System Board 1 Riser Config Err 0: Connected")
         ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
+	ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
         if instance['OperationalStatus'] is not None :
           elementStatus = instance['OperationalStatus'][0]
           verboseoutput("    Element Op Status = %d" % elementStatus)
