@@ -660,7 +660,7 @@ for classe in ClassesToCheck :
         SerialNumber = instance[u'SerialNumber']
         if SerialNumber:
           verboseoutput("    SerialNumber = "+SerialNumber)
-	  isblade = "yes"
+          isblade = "yes"
 
       # Report detail of Numeric Sensors and generate nagios perfdata
 
