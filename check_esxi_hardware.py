@@ -207,7 +207,7 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Another two workarounds for Dell systems (VGA Cable Pres 0, Add-in Card 4 PEM Presence 0)
 #@---------------------------------------------------
-#@ Date   : 20140909
+#@ Date   : 20140916
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Output serial number of chassis if a blade server is checked
 #@---------------------------------------------------
@@ -219,7 +219,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20140319'
+version = '20140916'
 
 NS = 'root/cimv2'
 
@@ -318,6 +318,9 @@ ExitOK = 0
 ExitWarning = 1
 ExitCritical = 2
 ExitUnknown = 3
+
+# Special handling for blade servers
+isblade = "no"
 
 def dell_country(country):
   if country == 'at':  # Austria
