@@ -207,7 +207,7 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Another two workarounds for Dell systems (VGA Cable Pres 0, Add-in Card 4 PEM Presence 0)
 #@---------------------------------------------------
-#@ Date   : 20140916
+#@ Date   : 20150109
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Output serial number of chassis if a blade server is checked
 #@---------------------------------------------------
@@ -219,7 +219,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20140916'
+version = '20150109'
 
 NS = 'root/cimv2'
 
