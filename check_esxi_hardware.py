@@ -207,6 +207,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Another two workarounds for Dell systems (VGA Cable Pres 0, Add-in Card 4 PEM Presence 0)
 #@---------------------------------------------------
+#@ Date   : 20140916
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Output serial number of chassis if a blade server is checked
+#@---------------------------------------------------
 
 import sys
 import time
@@ -215,7 +219,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20140319'
+version = '20140916'
 
 NS = 'root/cimv2'
 
@@ -314,6 +318,9 @@ ExitOK = 0
 ExitWarning = 1
 ExitCritical = 2
 ExitUnknown = 3
+
+# Special handling for blade servers
+isblade = "no"
 
 def dell_country(country):
   if country == 'at':  # Austria
@@ -642,6 +649,7 @@ for classe in ClassesToCheck :
           man = 'Unknown Manufacturer'
         verboseoutput("    Manufacturer = "+man)
         SerialNumber = instance[u'SerialNumber']
+        SerialChassis = instance[u'SerialNumber']
         if SerialNumber:
           verboseoutput("    SerialNumber = "+SerialNumber)
         server_info = man + ' '
@@ -655,6 +663,7 @@ for classe in ClassesToCheck :
         SerialNumber = instance[u'SerialNumber']
         if SerialNumber:
           verboseoutput("    SerialNumber = "+SerialNumber)
+          isblade = "yes"
 
       # Report detail of Numeric Sensors and generate nagios perfdata
 
@@ -812,6 +821,10 @@ for classe in ClassesToCheck :
 if (urlise_country != '') :
   SerialNumber = urlised_serialnumber(vendor,urlise_country,SerialNumber)
   server_info = urlised_server_info(vendor,urlise_country,server_info)
+
+# If this is a blade server, also output chassis serial number as additional info
+if (isblade == "yes") :
+  SerialNumber += " Chassis S/N: %s " % (SerialChassis)
 
 # Output performance data
 perf = '|'
