@@ -211,6 +211,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Output serial number of chassis if a blade server is checked
 #@---------------------------------------------------
+#@ Date   : 20150115
+#@ Author : Andreas Gottwald
+#@ Reason : Fix NoneType element bug
+#@---------------------------------------------------
 
 import sys
 import time
@@ -219,7 +223,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20150109'
+version = '20150115'
 
 NS = 'root/cimv2'
 
@@ -628,6 +632,8 @@ for classe in ClassesToCheck :
     for instance in instance_list :
       sensor_value = ""
       elementName = instance['ElementName']
+      if elementName is None :
+      	elementName = 'Unknown'
       elementNameValue = elementName
       verboseoutput("  Element Name = "+elementName)
 
