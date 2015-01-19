@@ -24,7 +24,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2014 Claudio Kuenzler
+# Copyright (c) 2010-2015 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -35,6 +35,7 @@
 # Copyright (c) 2011 Ian Chard
 # Copyright (c) 2012 Craig Hart
 # Copyright (c) 2013 Carl R. Friend
+# Copyright (c) 2015 Andreas Gottwald
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -211,7 +212,7 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Output serial number of chassis if a blade server is checked
 #@---------------------------------------------------
-#@ Date   : 20150115
+#@ Date   : 20150119
 #@ Author : Andreas Gottwald
 #@ Reason : Fix NoneType element bug
 #@---------------------------------------------------
@@ -223,7 +224,7 @@ import re
 import string
 from optparse import OptionParser,OptionGroup
 
-version = '20150115'
+version = '20150119'
 
 NS = 'root/cimv2'
 
