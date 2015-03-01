@@ -36,6 +36,7 @@
 # Copyright (c) 2012 Craig Hart
 # Copyright (c) 2013 Carl R. Friend
 # Copyright (c) 2015 Andreas Gottwald
+# Copyright (c) 2015 Christian Bergum Bergersen
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -215,6 +216,10 @@
 #@ Date   : 20150119
 #@ Author : Andreas Gottwald
 #@ Reason : Fix NoneType element bug
+#@---------------------------------------------------
+#@ Date   : 20150301
+#@ Author : Christian Bergum Bergersen
+#@ Reason : Ignores SSL verification of WBEM connection. Required to turn on/off in pywbem 0.7.0 and higher.
 #@---------------------------------------------------
 
 import sys
@@ -570,7 +575,7 @@ if os_platform != "win32":
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
-wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS)
+wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
