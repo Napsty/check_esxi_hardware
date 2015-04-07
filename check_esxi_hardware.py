@@ -223,6 +223,7 @@ import pywbem
 import re
 import string
 from optparse import OptionParser,OptionGroup
+import os
 
 version = '20150119'
 
@@ -566,7 +567,7 @@ if os_platform != "win32":
   import signal
   def handler(signum, frame):
     print 'UNKNOWN: Execution time too long!'
-    sys.exit(ExitUnknown)
+    os._exit(ExitUnknown)
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
