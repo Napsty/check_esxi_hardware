@@ -216,12 +216,17 @@
 #@ Author : Andreas Gottwald
 #@ Reason : Fix NoneType element bug
 #@---------------------------------------------------
+#@ Date   : 20150512
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Added support for patched pywbem 0.7.0 and new version 0.8.0, handle SSL error exception
+#@---------------------------------------------------
 
 import sys
 import time
 import pywbem
 import re
 import string
+import pkg_resources
 from optparse import OptionParser,OptionGroup
 
 version = '20150119'
@@ -569,9 +574,25 @@ if os_platform != "win32":
     sys.exit(ExitCritical)
 
 # connection to host
-verboseoutput("Connection to "+hosturl)
-wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS)
-
+# pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
+pywbemversion = pkg_resources.get_distribution("pywbem").version 
+if '0.7.0' in pywbemversion:
+  verboseoutput("Found pywbem version "+pywbemversion)
+  verboseoutput("Connection to "+hosturl)
+  try: 
+    conntest = pywbem.WBEMConnection(hosturl, (user,password), NS)
+    c=wbemclient.EnumerateInstances('CIM_Card')
+  except:
+    verboseoutput("Connection error, disable SSL certification verification (probably newer pywbem version)")
+    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
+  else:
+    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS)
+# pywbem 0.8.0 and later
+elif '0.8.0' in pywbemversion:
+  verboseoutput("Found pywbem version "+pywbemversion)
+  wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
+  
+  
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
   signal.signal(signal.SIGALRM, handler)
