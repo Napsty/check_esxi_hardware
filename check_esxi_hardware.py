@@ -41,7 +41,7 @@
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
 #   http://www.vmware.com/support/developer/cim-sdk/smash/u2/ga/apirefdoc/
 #
-# The VMware 5.x CIM API is documented here: 
+# The VMware 5.x CIM API is documented here:
 #   http://pubs.vmware.com/vsphere-50/index.jsp?nav=/5_1_1
 #
 # This Nagios plugin is maintained here:
@@ -190,7 +190,7 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Added workaround for Dell PE x620 where "System Board 1 Riser Config Err 0: Connected"
 #@          element outputs wrong return code. Dell, please fix that.
-#@          Added web-link to VMware CIM API 5.x at top of script. 
+#@          Added web-link to VMware CIM API 5.x at top of script.
 #@---------------------------------------------------
 #@ Date   : 20130424
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
@@ -574,25 +574,25 @@ if os_platform != "win32":
     sys.exit(ExitCritical)
 
 # connection to host
+verboseoutput("Connection to "+hosturl)
 # pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
-pywbemversion = pkg_resources.get_distribution("pywbem").version 
+pywbemversion = pkg_resources.get_distribution("pywbem").version
+verboseoutput("Found pywbem version "+pywbemversion)
 if '0.7.0' in pywbemversion:
-  verboseoutput("Found pywbem version "+pywbemversion)
-  verboseoutput("Connection to "+hosturl)
-  try: 
-    conntest = pywbem.WBEMConnection(hosturl, (user,password), NS)
-    c=wbemclient.EnumerateInstances('CIM_Card')
+  try:
+    conntest = pywbem.WBEMConnection(hosturl, (user,password))
+    c = conntest.EnumerateInstances('CIM_Card')
   except:
-    verboseoutput("Connection error, disable SSL certification verification (probably newer pywbem version)")
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
+    #raise
+    verboseoutput("Connection error, disable SSL certification verification (probably patched pywbem)")
+    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), no_verification=True)
   else:
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS)
+    verboseoutput("Connection worked")
+    wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
 # pywbem 0.8.0 and later
 elif '0.8.0' in pywbemversion:
-  verboseoutput("Found pywbem version "+pywbemversion)
   wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
-  
-  
+
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
   signal.signal(signal.SIGALRM, handler)
@@ -655,7 +655,7 @@ for classe in ClassesToCheck :
       sensor_value = ""
       elementName = instance['ElementName']
       if elementName is None :
-      	elementName = 'Unknown'
+        elementName = 'Unknown'
       elementNameValue = elementName
       verboseoutput("  Element Name = "+elementName)
 
@@ -798,8 +798,8 @@ for classe in ClassesToCheck :
         # Added 20121027 As long as Dell doesnt correct these CIM elements return code we have to ignore it
         ignore_list.append("System Board 1 Riser Config Err 0: Connected")
         ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
-	ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
-	ignore_list.append("Add-in Card 4 PEM Presence 0: Connected")
+        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
+        ignore_list.append("Add-in Card 4 PEM Presence 0: Connected")
         if instance['OperationalStatus'] is not None :
           elementStatus = instance['OperationalStatus'][0]
           verboseoutput("    Element Op Status = %d" % elementStatus)
@@ -884,3 +884,4 @@ else:
   print "%s- Server: %s %s %s%s" % (ExitMsg, server_info, SerialNumber, bios_info, perf)
 
 sys.exit (GlobalStatus)
+
