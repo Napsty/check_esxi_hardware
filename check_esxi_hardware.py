@@ -229,7 +229,7 @@ import string
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20150119'
+version = '20150626'
 
 NS = 'root/cimv2'
 
