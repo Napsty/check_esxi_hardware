@@ -216,7 +216,7 @@
 #@ Author : Andreas Gottwald
 #@ Reason : Fix NoneType element bug
 #@---------------------------------------------------
-#@ Date   : 20150512
+#@ Date   : 20150626
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Added support for patched pywbem 0.7.0 and new version 0.8.0, handle SSL error exception
 #@---------------------------------------------------
