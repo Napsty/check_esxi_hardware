@@ -36,6 +36,7 @@
 # Copyright (c) 2012 Craig Hart
 # Copyright (c) 2013 Carl R. Friend
 # Copyright (c) 2015 Andreas Gottwald
+# Copyright (c) 2015 Stanislav German-Evtushenko
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -220,6 +221,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Added support for patched pywbem 0.7.0 and new version 0.8.0, handle SSL error exception
 #@---------------------------------------------------
+#@ Date   : 20150710
+#@ Author : Stanislav German-Evtushenko
+#@ Reason : Exit Unknown instead of Critical for timeouts and auth errors
+#@---------------------------------------------------
 
 import sys
 import time
@@ -229,7 +234,7 @@ import string
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20150626'
+version = '20150710'
 
 NS = 'root/cimv2'
 
