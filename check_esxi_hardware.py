@@ -570,8 +570,8 @@ if os_platform != "win32":
   on_windows = False
   import signal
   def handler(signum, frame):
-    print 'CRITICAL: Execution time too long!'
-    sys.exit(ExitCritical)
+    print 'UNKNOWN: Execution time too long!'
+    sys.exit(ExitUnknown)
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
@@ -640,13 +640,13 @@ for classe in ClassesToCheck :
     instance_list = wbemclient.EnumerateInstances(classe)
   except pywbem.cim_operations.CIMError,args:
     if ( args[1].find('Socket error') >= 0 ):
-      print "CRITICAL: %s" %args
-      sys.exit (ExitCritical)
+      print "UNKNOWN: %s" %args
+      sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except pywbem.cim_http.AuthError,arg:
     verboseoutput("Global exit set to UNKNOWN")
-    GlobalStatus = ExitCritical
+    GlobalStatus = ExitUnknown
     print "UNKNOWN: Authentication Error"
     sys.exit (GlobalStatus)
   else:
