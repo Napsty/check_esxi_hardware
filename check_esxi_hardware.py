@@ -24,7 +24,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2015 Claudio Kuenzler
+# Copyright (c) 2010-2016 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -225,6 +225,10 @@
 #@ Author : Stanislav German-Evtushenko
 #@ Reason : Exit Unknown instead of Critical for timeouts and auth errors
 #@---------------------------------------------------
+#@ Date   : 20160406
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Distinguish between pywbem 0.7 and 0.8 (which is now released)
+#@---------------------------------------------------
 
 import sys
 import time
@@ -234,7 +238,7 @@ import string
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20150710'
+version = '20160406'
 
 NS = 'root/cimv2'
 
@@ -583,7 +587,7 @@ verboseoutput("Connection to "+hosturl)
 # pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
 pywbemversion = pkg_resources.get_distribution("pywbem").version
 verboseoutput("Found pywbem version "+pywbemversion)
-if '0.7.0' in pywbemversion:
+if '0.7.' in pywbemversion:
   try:
     conntest = pywbem.WBEMConnection(hosturl, (user,password))
     c = conntest.EnumerateInstances('CIM_Card')
@@ -595,7 +599,7 @@ if '0.7.0' in pywbemversion:
     verboseoutput("Connection worked")
     wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
 # pywbem 0.8.0 and later
-elif '0.8.0' in pywbemversion:
+elif '0.8.' in pywbemversion:
   wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
