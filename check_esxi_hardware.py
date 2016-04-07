@@ -229,9 +229,7 @@
 #@ Date   : 20151111
 #@ Author : Stefan Roos
 #@ Reason : Removed unused sensor_value variable and string import.
-#@ Reason : Removed no SSL tryout on pywbem v 0.0.7 (default version doesn't have no_verification).
 #@ Reason : Added global hosturl variable declaration after imports.
-#@ Reason : Added "Front Panel Board 1 FP LCD Cable 0: Connected" to ignore list (LENOVO System x3550 M5).
 #@---------------------------------------------------
 
 import sys
@@ -244,7 +242,7 @@ from optparse import OptionParser,OptionGroup
 version = '20151111'
 
 NS = 'root/cimv2'
-hosturl = 'https://esxi.localdomain'
+hosturl = ''
 
 # define classes to check 'OperationStatus' instance
 ClassesToCheck = [
@@ -596,9 +594,9 @@ if '0.7.0' in pywbemversion:
     conntest = pywbem.WBEMConnection(hosturl, (user,password))
     c = conntest.EnumerateInstances('CIM_Card')
   except:
-    verboseoutput("Connection error")
-    print "UNKNOWN: unable to connect"
-    sys.exit (ExitUnknown)
+    #raise
+    verboseoutput("Connection error, disable SSL certification verification (probably patched pywbem)")
+    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), no_verification=True)
   else:
     verboseoutput("Connection worked")
     wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
@@ -811,7 +809,6 @@ for classe in ClassesToCheck :
         ignore_list.append("System Board 1 Riser Config Err 0: Connected")
         ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
         ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
-        ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
         ignore_list.append("Add-in Card 4 PEM Presence 0: Connected")
         if instance['OperationalStatus'] is not None :
           elementStatus = instance['OperationalStatus'][0]
