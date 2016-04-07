@@ -37,6 +37,7 @@
 # Copyright (c) 2013 Carl R. Friend
 # Copyright (c) 2015 Andreas Gottwald
 # Copyright (c) 2015 Stanislav German-Evtushenko
+# Copyright (c) 2015 Stefan Roos
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -225,18 +226,23 @@
 #@ Author : Stanislav German-Evtushenko
 #@ Reason : Exit Unknown instead of Critical for timeouts and auth errors
 #@---------------------------------------------------
+#@ Date   : 20151111
+#@ Author : Stefan Roos
+#@ Reason : Removed unused sensor_value variable and string import.
+#@ Reason : Added global hosturl variable declaration after imports.
+#@---------------------------------------------------
 
 import sys
 import time
 import pywbem
 import re
-import string
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20150710'
+version = '20151111'
 
 NS = 'root/cimv2'
+hosturl = ''
 
 # define classes to check 'OperationStatus' instance
 ClassesToCheck = [
@@ -657,7 +663,6 @@ for classe in ClassesToCheck :
   else:
     # GlobalStatus = ExitOK #ARR
     for instance in instance_list :
-      sensor_value = ""
       elementName = instance['ElementName']
       if elementName is None :
         elementName = 'Unknown'
@@ -889,4 +894,3 @@ else:
   print "%s- Server: %s %s %s%s" % (ExitMsg, server_info, SerialNumber, bios_info, perf)
 
 sys.exit (GlobalStatus)
-
