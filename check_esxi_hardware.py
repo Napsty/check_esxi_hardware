@@ -307,6 +307,9 @@ perf_Prefix = {
 # host name
 hostname=''
 
+# cim port
+cimport=''
+
 # user
 user=''
 
@@ -461,14 +464,11 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,get_power,get_volts,get_current,get_temp,get_fan
-  usage = "usage: %prog  https://hostname user password system [verbose]\n" \
-    "example: %prog https://my-shiny-new-vmware-server root fakepassword dell\n\n" \
-    "or, using new style options:\n\n" \
-    "usage: %prog -H hostname -U username -P password [-V system -v -p -I XX]\n" \
-    "example: %prog -H my-shiny-new-vmware-server -U root -P fakepassword -V auto -I uk\n\n" \
+  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,get_power,get_volts,get_current,get_temp,get_fan
+  usage = "usage: %prog -H hostname -U username -P password [-C port -V system -v -p -I XX]\n" \
+    "example: %prog -H my-shiny-new-vmware-server -U root -P fakepassword -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
-    "usage: %prog --host=hostname --user=username --pass=password [--vendor=system --verbose --perfdata --html=XX]\n"
+    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --vendor=system --verbose --perfdata --html=XX]\n"
 
   parser = OptionParser(usage=usage, version="%prog "+version)
   group1 = OptionGroup(parser, 'Mandatory parameters')
@@ -479,6 +479,7 @@ def getopts() :
   group1.add_option("-P", "--pass", dest="password", \
       help="password, if password matches file:<path>, first line of given file will be used as password", metavar="PASS")
 
+  group2.add_option("-C", "--cimport", dest="cimport", help="CIM port (default 5989)", metavar="CIMPORT")
   group2.add_option("-V", "--vendor", dest="vendor", help="Vendor code: auto, dell, hp, ibm, intel, or unknown (default)", \
       metavar="VENDOR", type='choice', choices=['auto','dell','hp','ibm','intel','unknown'],default="unknown")
   group2.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, \
@@ -546,6 +547,7 @@ def getopts() :
 
     user=options.user
     password=options.password
+    cimport=options.cimport
     vendor=options.vendor.lower()
     verbose=options.verbose
     perfdata=options.perfdata
@@ -587,6 +589,10 @@ if os_platform != "win32":
   def handler(signum, frame):
     print 'UNKNOWN: Execution time too long!'
     sys.exit(ExitUnknown)
+
+if cimport:
+  verboseoutput("Using manually defined CIM port "+cimport)
+  hosturl += ':'+cimport 
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
