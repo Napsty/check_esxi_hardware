@@ -235,6 +235,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Distinguish between pywbem 0.7 and 0.8 (which is now released)
 #@---------------------------------------------------
+#@ Date   : 20160531
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Add parameter for variable CIM port (useful when behind NAT)
+#@---------------------------------------------------
 
 import sys
 import time
@@ -243,7 +247,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20160411'
+version = '20160531'
 
 NS = 'root/cimv2'
 hosturl = ''
