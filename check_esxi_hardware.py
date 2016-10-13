@@ -239,6 +239,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Add parameter for variable CIM port (useful when behind NAT)
 #@---------------------------------------------------
+#@ Date   : 20161013
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Added support for pywbem 0.9.x (and upcoming releases)
+#@---------------------------------------------------
 
 import sys
 import time
@@ -247,7 +251,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20160531'
+version = '20161013'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -615,7 +619,7 @@ if '0.7.' in pywbemversion:
     verboseoutput("Connection worked")
     wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
 # pywbem 0.8.0 and later
-elif '0.8.' in pywbemversion:
+else:
   wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
