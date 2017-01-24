@@ -808,11 +808,11 @@ for classe in ClassesToCheck :
             30 : ExitCritical,  # Non-recoverable Error
           }[elementStatus]
           if (interpretStatus == ExitCritical) :
-            verboseoutput("GLobal exit set to CRITICAL")
+            verboseoutput("Global exit set to CRITICAL")
             GlobalStatus = ExitCritical
             ExitMsg += " CRITICAL : %s " % elementNameValue
           if (interpretStatus == ExitWarning and GlobalStatus != ExitCritical) :
-            verboseoutput("GLobal exit set to WARNING")
+            verboseoutput("Global exit set to WARNING")
             GlobalStatus = ExitWarning
             ExitMsg += " WARNING : %s " % elementNameValue
           # Added the following for when GlobalStatus is ExitCritical and a warning is detected
@@ -863,7 +863,7 @@ for classe in ClassesToCheck :
             GlobalStatus = ExitCritical
             ExitMsg += " CRITICAL : %s " % elementNameValue
           if (interpretStatus == ExitWarning and GlobalStatus != ExitCritical) :
-            verboseoutput("GLobal exit set to WARNING")
+            verboseoutput("Global exit set to WARNING")
             GlobalStatus = ExitWarning
             ExitMsg += " WARNING : %s " % elementNameValue
           # Added same logic as in 20100702 here, otherwise Dell servers would return UNKNOWN instead of OK
