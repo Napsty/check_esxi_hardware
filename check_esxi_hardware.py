@@ -646,7 +646,7 @@ if vendor=='auto':
       sys.exit (ExitUnknown)
     elif ( args[1].find('ThreadPool --- Failed to enqueue request') >= 0 ):
       print "UNKNOWN: %s" %args
-      sys.exit (ExitUnknown)  
+      sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except pywbem.cim_http.AuthError,arg:
@@ -673,6 +673,9 @@ for classe in ClassesToCheck :
     instance_list = wbemclient.EnumerateInstances(classe)
   except pywbem.cim_operations.CIMError,args:
     if ( args[1].find('Socket error') >= 0 ):
+      print "UNKNOWN: %s" %args
+      sys.exit (ExitUnknown)
+    elif ( args[1].find('ThreadPool --- Failed to enqueue request') >= 0 ):
       print "UNKNOWN: %s" %args
       sys.exit (ExitUnknown)
     else:
