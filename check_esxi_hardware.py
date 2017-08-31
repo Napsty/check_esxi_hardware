@@ -348,6 +348,7 @@ get_volts   = True
 get_current = True
 get_temp    = True
 get_fan     = True
+get_lcd     = True
 
 # define exit codes
 ExitOK = 0
@@ -472,7 +473,7 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,get_power,get_volts,get_current,get_temp,get_fan
+  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,get_power,get_volts,get_current,get_temp,get_fan,get_lcd
   usage = "usage: %prog -H hostname -U username -P password [-C port -V system -v -p -I XX]\n" \
     "example: %prog -H my-shiny-new-vmware-server -U root -P fakepassword -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
@@ -510,6 +511,8 @@ def getopts() :
       help="don't collect temperature performance data")
   group2.add_option("--no-fan", action="store_false", dest="get_fan", default=True, \
       help="don't collect fan performance data")
+  group2.add_option("--no-lcd", action="store_false", dest="get_lcd", default=True, \
+      help="don't collect lcd/front display status")
 
   parser.add_option_group(group1)
   parser.add_option_group(group2)
@@ -567,6 +570,7 @@ def getopts() :
     get_current=options.get_current
     get_temp=options.get_temp
     get_fan=options.get_fan
+    get_lcd=options.get_lcd
 
   # if user or password starts with 'file:', use the first string in file as user, second as password
   if (re.match('^file:', user) or re.match('^file:', password)):
@@ -788,6 +792,11 @@ for classe in ClassesToCheck :
         verboseoutput("    Family = %d" % instance['Family'])
         verboseoutput("    CurrentClockSpeed = %dMHz" % instance['CurrentClockSpeed'])
 
+      # Append lcd related elements to ignore list if --no-lcd was used
+      if get_lcd:
+        ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
+        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
+        ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
 
       # HP Check
       if vendor == "hp" :
@@ -804,11 +813,11 @@ for classe in ClassesToCheck :
             30 : ExitCritical,  # Non-recoverable Error
           }[elementStatus]
           if (interpretStatus == ExitCritical) :
-            verboseoutput("GLobal exit set to CRITICAL")
+            verboseoutput("Global exit set to CRITICAL")
             GlobalStatus = ExitCritical
             ExitMsg += " CRITICAL : %s " % elementNameValue
           if (interpretStatus == ExitWarning and GlobalStatus != ExitCritical) :
-            verboseoutput("GLobal exit set to WARNING")
+            verboseoutput("Global exit set to WARNING")
             GlobalStatus = ExitWarning
             ExitMsg += " WARNING : %s " % elementNameValue
           # Added the following for when GlobalStatus is ExitCritical and a warning is detected
@@ -825,8 +834,6 @@ for classe in ClassesToCheck :
       elif (vendor == "dell" or vendor == "intel" or vendor == "ibm" or vendor=="unknown") :
         # Added 20121027 As long as Dell doesnt correct these CIM elements return code we have to ignore it
         ignore_list.append("System Board 1 Riser Config Err 0: Connected")
-        ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
-        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
         ignore_list.append("Add-in Card 4 PEM Presence 0: Connected")
         if instance['OperationalStatus'] is not None :
           elementStatus = instance['OperationalStatus'][0]
@@ -859,7 +866,7 @@ for classe in ClassesToCheck :
             GlobalStatus = ExitCritical
             ExitMsg += " CRITICAL : %s " % elementNameValue
           if (interpretStatus == ExitWarning and GlobalStatus != ExitCritical) :
-            verboseoutput("GLobal exit set to WARNING")
+            verboseoutput("Global exit set to WARNING")
             GlobalStatus = ExitWarning
             ExitMsg += " WARNING : %s " % elementNameValue
           # Added same logic as in 20100702 here, otherwise Dell servers would return UNKNOWN instead of OK
