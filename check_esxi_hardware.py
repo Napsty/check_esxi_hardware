@@ -793,7 +793,8 @@ for classe in ClassesToCheck :
         verboseoutput("    CurrentClockSpeed = %dMHz" % instance['CurrentClockSpeed'])
 
       # Append lcd related elements to ignore list if --no-lcd was used
-      if get_lcd:
+      verboseoutput("LCD Status: %s" % get_lcd)
+      if get_lcd == "True":
         ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
         ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
         ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
