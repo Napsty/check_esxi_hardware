@@ -605,6 +605,13 @@ if os_platform != "win32":
 if cimport:
   verboseoutput("Using manually defined CIM port "+cimport)
   hosturl += ':'+cimport 
+  
+# Append lcd related elements to ignore list if --no-lcd was used
+verboseoutput("LCD Status: %s" % get_lcd)
+if not get_lcd:
+  ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
+  ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
+  ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
@@ -695,13 +702,6 @@ for classe in ClassesToCheck :
       if elementName in ignore_list :
         verboseoutput("    (ignored)")
         continue      
-        
-      # Append lcd related elements to ignore list if --no-lcd was used
-      verboseoutput("LCD Status: %s" % get_lcd)
-      if not get_lcd:
-        ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
-        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
-        ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
 
       # BIOS & Server info
       if elementName == 'System BIOS' :
