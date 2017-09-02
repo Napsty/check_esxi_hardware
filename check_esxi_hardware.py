@@ -694,7 +694,14 @@ for classe in ClassesToCheck :
       # Ignore element if we don't want it
       if elementName in ignore_list :
         verboseoutput("    (ignored)")
-        continue
+        continue      
+        
+      # Append lcd related elements to ignore list if --no-lcd was used
+      verboseoutput("LCD Status: %s" % get_lcd)
+      if not get_lcd:
+        ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
+        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
+        ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
 
       # BIOS & Server info
       if elementName == 'System BIOS' :
@@ -791,13 +798,6 @@ for classe in ClassesToCheck :
       elif classe == "CIM_Processor" :
         verboseoutput("    Family = %d" % instance['Family'])
         verboseoutput("    CurrentClockSpeed = %dMHz" % instance['CurrentClockSpeed'])
-
-      # Append lcd related elements to ignore list if --no-lcd was used
-      verboseoutput("LCD Status: %s" % get_lcd)
-      if get_lcd == "False":
-        ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
-        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
-        ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
 
       # HP Check
       if vendor == "hp" :
