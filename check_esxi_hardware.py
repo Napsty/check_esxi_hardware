@@ -24,7 +24,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2016 Claudio Kuenzler
+# Copyright (c) 2010-2017 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -243,6 +243,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Added support for pywbem 0.9.x (and upcoming releases)
 #@---------------------------------------------------
+#@ Date   : 20170905
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Added option to ignore LCD/Display related elements (--no-lcd)
+#@---------------------------------------------------
 
 import sys
 import time
@@ -251,7 +255,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20161013'
+version = '20170905'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -612,6 +616,7 @@ if not get_lcd:
   ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
   ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
   ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
+  ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Config Error")
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
