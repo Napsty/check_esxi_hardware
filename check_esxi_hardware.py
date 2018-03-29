@@ -24,7 +24,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2017 Claudio Kuenzler
+# Copyright (c) 2010-2018 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -247,6 +247,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Added option to ignore LCD/Display related elements (--no-lcd)
 #@---------------------------------------------------
+#@ Date   : 20180329
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Try to use internal pywbem function to determine version
+#@---------------------------------------------------
 
 import sys
 import time
@@ -255,7 +259,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20170905'
+version = '20180329'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -621,8 +625,14 @@ if not get_lcd:
 # connection to host
 verboseoutput("Connection to "+hosturl)
 # pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
-pywbemversion = pkg_resources.get_distribution("pywbem").version
+try:
+  pywbemversion = pywbem.__version__
+except:
+  pywbemversion = pkg_resources.get_distribution("pywbem").version
+else:
+  pywbemversion = pywbem.__version__
 verboseoutput("Found pywbem version "+pywbemversion)
+
 if '0.7.' in pywbemversion:
   try:
     conntest = pywbem.WBEMConnection(hosturl, (user,password))
