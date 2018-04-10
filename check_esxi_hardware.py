@@ -24,7 +24,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2016 Claudio Kuenzler
+# Copyright (c) 2010-2018 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -244,6 +244,14 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Added support for pywbem 0.9.x (and upcoming releases)
 #@---------------------------------------------------
+#@ Date   : 20170905
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Added option to ignore LCD/Display related elements (--no-lcd)
+#@---------------------------------------------------
+#@ Date   : 20180329
+#@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
+#@ Reason : Try to use internal pywbem function to determine version
+#@---------------------------------------------------
 
 import sys
 import time
@@ -252,7 +260,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20161013'
+version = '20180329'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -349,6 +357,7 @@ get_volts   = True
 get_current = True
 get_temp    = True
 get_fan     = True
+get_lcd     = True
 
 # define exit codes
 ExitOK = 0
@@ -473,7 +482,7 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,get_power,get_volts,get_current,get_temp,get_fan
+  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,get_power,get_volts,get_current,get_temp,get_fan,get_lcd
   usage = "usage: %prog -H hostname -U username -P password [-C port -V system -v -p -I XX]\n" \
     "example: %prog -H my-shiny-new-vmware-server -U root -P fakepassword -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
@@ -511,6 +520,8 @@ def getopts() :
       help="don't collect temperature performance data")
   group2.add_option("--no-fan", action="store_false", dest="get_fan", default=True, \
       help="don't collect fan performance data")
+  group2.add_option("--no-lcd", action="store_false", dest="get_lcd", default=True, \
+      help="don't collect lcd/front display status")
 
   parser.add_option_group(group1)
   parser.add_option_group(group2)
@@ -568,6 +579,7 @@ def getopts() :
     get_current=options.get_current
     get_temp=options.get_temp
     get_fan=options.get_fan
+    get_lcd=options.get_lcd
 
   # if user or password starts with 'file:', use the first string in file as user, second as password
   if (re.match('^file:', user) or re.match('^file:', password)):
@@ -602,12 +614,26 @@ if os_platform != "win32":
 if cimport:
   verboseoutput("Using manually defined CIM port "+cimport)
   hosturl += ':'+cimport 
+  
+# Append lcd related elements to ignore list if --no-lcd was used
+verboseoutput("LCD Status: %s" % get_lcd)
+if not get_lcd:
+  ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
+  ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
+  ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
+  ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Config Error")
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
 # pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
-pywbemversion = pkg_resources.get_distribution("pywbem").version
+try:
+  pywbemversion = pywbem.__version__
+except:
+  pywbemversion = pkg_resources.get_distribution("pywbem").version
+else:
+  pywbemversion = pywbem.__version__
 verboseoutput("Found pywbem version "+pywbemversion)
+
 if '0.7.' in pywbemversion:
   try:
     conntest = pywbem.WBEMConnection(hosturl, (user,password))
@@ -697,7 +723,7 @@ for classe in ClassesToCheck :
       # Ignore element if we don't want it
       if elementName in ignore_list :
         verboseoutput("    (ignored)")
-        continue
+        continue      
 
       # BIOS & Server info
       if elementName == 'System BIOS' :
@@ -795,7 +821,6 @@ for classe in ClassesToCheck :
         verboseoutput("    Family = %d" % instance['Family'])
         verboseoutput("    CurrentClockSpeed = %dMHz" % instance['CurrentClockSpeed'])
 
-
       # HP Check
       if vendor == "hp" :
         if instance['HealthState'] is not None :
@@ -832,8 +857,6 @@ for classe in ClassesToCheck :
       elif (vendor == "dell" or vendor == "intel" or vendor == "ibm" or vendor=="unknown") :
         # Added 20121027 As long as Dell doesnt correct these CIM elements return code we have to ignore it
         ignore_list.append("System Board 1 Riser Config Err 0: Connected")
-        ignore_list.append("System Board 1 LCD Cable Pres 0: Connected")
-        ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
         ignore_list.append("Add-in Card 4 PEM Presence 0: Connected")
         if instance['OperationalStatus'] is not None :
           elementStatus = instance['OperationalStatus'][0]
