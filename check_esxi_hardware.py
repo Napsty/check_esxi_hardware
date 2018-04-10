@@ -723,7 +723,7 @@ for classe in ClassesToCheck :
       # Ignore element if we don't want it
       if elementName in ignore_list :
         verboseoutput("    (ignored)")
-        continue      
+        continue
 
       # BIOS & Server info
       if elementName == 'System BIOS' :
