@@ -38,6 +38,7 @@
 # Copyright (c) 2015 Andreas Gottwald
 # Copyright (c) 2015 Stanislav German-Evtushenko
 # Copyright (c) 2015 Stefan Roos
+# Copyright (c) 2017 Peter Newman
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -669,6 +670,9 @@ if vendor=='auto':
     if ( args[1].find('Socket error') >= 0 ):
       print "UNKNOWN: %s" %args
       sys.exit (ExitUnknown)
+    elif ( args[1].find('ThreadPool --- Failed to enqueue request') >= 0 ):
+      print "UNKNOWN: %s" %args
+      sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except pywbem.cim_http.AuthError,arg:
@@ -697,6 +701,9 @@ for classe in ClassesToCheck :
     if ( args[1].find('Socket error') >= 0 ):
       print "UNKNOWN: %s" %args
       sys.exit (ExitUnknown)
+    elif ( args[1].find('ThreadPool --- Failed to enqueue request') >= 0 ):
+      print "UNKNOWN: %s" %args
+      sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except pywbem.cim_http.AuthError,arg:
@@ -716,7 +723,7 @@ for classe in ClassesToCheck :
       # Ignore element if we don't want it
       if elementName in ignore_list :
         verboseoutput("    (ignored)")
-        continue      
+        continue
 
       # BIOS & Server info
       if elementName == 'System BIOS' :
