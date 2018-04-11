@@ -38,7 +38,7 @@
 # Copyright (c) 2015 Andreas Gottwald
 # Copyright (c) 2015 Stanislav German-Evtushenko
 # Copyright (c) 2015 Stefan Roos
-# Copyright (c) 2017 Peter Newman
+# Copyright (c) 2018 Peter Newman
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -252,6 +252,10 @@
 #@ Author : Claudio Kuenzler (www.claudiokuenzler.com)
 #@ Reason : Try to use internal pywbem function to determine version
 #@---------------------------------------------------
+#@ Date   : 20180411
+#@ Author : Peter Newman
+#@ Reason : Throw an unknown if we can't fetch the data for some reason
+#@---------------------------------------------------
 
 import sys
 import time
@@ -260,7 +264,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20180329'
+version = '20180411'
 
 NS = 'root/cimv2'
 hosturl = ''
