@@ -256,6 +256,10 @@
 #@ Author : Peter Newman
 #@ Reason : Throw an unknown if we can't fetch the data for some reason
 #@---------------------------------------------------
+#@ Date   : 20181001
+#@ Author : Claudio Kuenzler
+#@ Reason : python3 compatibility
+#@---------------------------------------------------
 
 import sys
 import time
@@ -481,7 +485,7 @@ def urlised_serialnumber(vendor,country,SerialNumber):
 
 def verboseoutput(message) :
   if verbose:
-    print "%s %s" % (time.strftime("%Y%m%d %H:%M:%S"), message)
+    print(time.strftime("%Y%m%d %H:%M:%S"), message)
 
 # ----------------------------------------------------------------------
 
@@ -532,14 +536,14 @@ def getopts() :
 
   # check input arguments
   if len(sys.argv) < 2:
-    print "no parameters specified\n"
+    print("no parameters specified\n")
     parser.print_help()
     sys.exit(-1)
   # if first argument starts with 'https://' we have old-style parameters, so handle in old way
   if re.match("https://",sys.argv[1]):
     # check input arguments
     if len(sys.argv) < 5:
-      print "too few parameters\n"
+      print("too few parameters\n")
       parser.print_help()
       sys.exit(-1)
     if len(sys.argv) > 5 :
@@ -557,7 +561,7 @@ def getopts() :
     mandatories = ['host', 'user', 'password']
     for m in mandatories:
       if not options.__dict__[m]:
-        print "mandatory parameter '--" + m + "' is missing\n"
+        print("mandatory parameter '--" + m + "' is missing\n")
         parser.print_help()
         sys.exit(-1)
 
@@ -612,7 +616,7 @@ if os_platform != "win32":
   on_windows = False
   import signal
   def handler(signum, frame):
-    print 'UNKNOWN: Execution time too long!'
+    print('UNKNOWN: Execution time too long!')
     sys.exit(ExitUnknown)
 
 if cimport:
@@ -670,19 +674,19 @@ ExitMsg = ""
 if vendor=='auto':
   try:
     c=wbemclient.EnumerateInstances('CIM_Chassis')
-  except pywbem.cim_operations.CIMError,args:
+  except pywbem.cim_operations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
-      print "UNKNOWN: %s" %args
+      print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
     elif ( args[1].find('ThreadPool --- Failed to enqueue request') >= 0 ):
-      print "UNKNOWN: %s" %args
+      print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
-  except pywbem.cim_http.AuthError,arg:
+  except pywbem.cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
-    print "UNKNOWN: Authentication Error"
+    print("UNKNOWN: Authentication Error")
     sys.exit (GlobalStatus)
   else:
     man=c[0][u'Manufacturer']
@@ -701,19 +705,19 @@ for classe in ClassesToCheck :
   verboseoutput("Check classe "+classe)
   try:
     instance_list = wbemclient.EnumerateInstances(classe)
-  except pywbem.cim_operations.CIMError,args:
+  except pywbem.cim_operations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
-      print "UNKNOWN: %s" %args
+      print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
     elif ( args[1].find('ThreadPool --- Failed to enqueue request') >= 0 ):
-      print "UNKNOWN: %s" %args
+      print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
-  except pywbem.cim_http.AuthError,arg:
+  except pywbem.cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
-    print "UNKNOWN: Authentication Error"
+    print("UNKNOWN: Authentication Error")
     sys.exit (GlobalStatus)
   else:
     # GlobalStatus = ExitOK #ARR
@@ -937,12 +941,12 @@ if perf == '|':
   perf = ''
 
 if GlobalStatus == ExitOK :
-  print "OK - Server: %s %s %s%s" % (server_info, SerialNumber, bios_info, perf)
+  print("OK - Server: %s %s %s%s" % (server_info, SerialNumber, bios_info, perf))
 
 elif GlobalStatus == ExitUnknown :
-  print "UNKNOWN: %s" % (ExitMsg) #ARR
+  print("UNKNOWN: %s" % (ExitMsg)) #ARR
 
 else:
-  print "%s- Server: %s %s %s%s" % (ExitMsg, server_info, SerialNumber, bios_info, perf)
+  print("%s - Server:  %s %s %s%s" % (ExitMsg, server_info, SerialNumber, bios_info, perf))
 
 sys.exit (GlobalStatus)
