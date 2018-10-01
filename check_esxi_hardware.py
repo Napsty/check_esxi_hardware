@@ -261,6 +261,7 @@
 #@ Reason : python3 compatibility
 #@---------------------------------------------------
 
+from __future__ import print_function
 import sys
 import time
 import pywbem
@@ -268,7 +269,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20180411'
+version = '20181001'
 
 NS = 'root/cimv2'
 hosturl = ''
