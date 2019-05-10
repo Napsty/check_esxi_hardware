@@ -8,4 +8,4 @@ This is the public git repository for development of the plugin.
 
 Documentation + Production Ready Plugin
 -------------
-Please refer to http://www.claudiokuenzler.com/nagios-plugins/check_esxi_hardware.php 
+Please refer to https://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php 

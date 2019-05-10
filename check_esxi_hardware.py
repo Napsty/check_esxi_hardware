@@ -47,8 +47,8 @@
 # The VMware 5.x CIM API is documented here:
 #   http://pubs.vmware.com/vsphere-50/index.jsp?nav=/5_1_1
 #
-# This Nagios plugin is maintained and documented here:
-#   http://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php
+# This monitoring plugin is maintained and documented here:
+#   https://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php
 #
 #@---------------------------------------------------
 #@ History
@@ -260,7 +260,7 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : python3 compatibility
 #@---------------------------------------------------
-#@ Date   : 20190503
+#@ Date   : 20190510
 #@ Author : Claudio Kuenzler
 #@ Reason : Allow regular expressions from ignore list (-r)
 #@---------------------------------------------------
@@ -273,7 +273,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20190503'
+version = '20190510'
 
 NS = 'root/cimv2'
 hosturl = ''
