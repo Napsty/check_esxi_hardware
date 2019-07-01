@@ -264,6 +264,9 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Allow regular expressions from ignore list (-r)
 #@---------------------------------------------------
+#@ Date   : 20190701
+#@ Author : Phil Randal (phil.randal@gmail.com)
+#@ Reason : Fix lookup of warranty info for Dell (again)
 
 from __future__ import print_function
 import sys
@@ -273,7 +276,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20190510'
+version = '20190701'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -445,7 +448,7 @@ def urlised_server_info(vendor, country, server_info):
   #server_inf = server_info
   if vendor == 'dell' :
     # Dell support URLs (idea and tables borrowed from check_openmanage)
-    du = 'http://www.dell.com/support/troubleshooting/' + dell_country(country) + '19/Product/poweredge-'
+    du = 'http://www.dell.com/support/home/' + dell_country(country) + '04/product-support/product/poweredge-'
     if (server_info is not None) :
       p=re.match('(.*)PowerEdge (.*) (.*)',server_info)
       if (p is not None) :
@@ -453,7 +456,7 @@ def urlised_server_info(vendor, country, server_info):
         if md == 'R210 II':
           md='r210-2'
         md=md.lower()
-        server_info = p.group(1) + '<a href="' + du + md + '#ui-tabs-4">PowerEdge ' + p.group(2)+'</a> ' + p.group(3)
+        server_info = p.group(1) + '<a href="' + du + md + '/">PowerEdge ' + p.group(2)+'</a> ' + p.group(3)
   elif vendor == 'hp':
     return server_info
   elif vendor == 'ibm':
@@ -468,8 +471,8 @@ def urlised_server_info(vendor, country, server_info):
 def system_tag_url(vendor,country):
   if vendor == 'dell':
     # Dell support sites
-    supportsite = 'http://www.dell.com/support/troubleshooting/'
-    dellsuffix = 'nodhs1/Index?t=warranty&servicetag='
+    supportsite = 'http://www.dell.com/support/home/'
+    dellsuffix = '19/product-support/servicetag/'
 
     # warranty URLs for different country codes
     return supportsite + dell_country(country) + dellsuffix
