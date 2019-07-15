@@ -38,7 +38,7 @@
 # Copyright (c) 2015 Andreas Gottwald
 # Copyright (c) 2015 Stanislav German-Evtushenko
 # Copyright (c) 2015 Stefan Roos
-# Copyright (c) 2018 Peter Newman
+# Copyright (c) 2018-2019 Peter Newman
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -659,10 +659,17 @@ if '0.7.' in pywbemversion:
   try:
     conntest = pywbem.WBEMConnection(hosturl, (user,password))
     c = conntest.EnumerateInstances('CIM_Card')
-  except:
+  except pywbem.cim_http.Error, arg:
     #raise
-    verboseoutput("Connection error, disable SSL certificate verification (probably patched pywbem)")
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), no_verification=True)
+    if ( arg.__str__().find('SSL error: certificate verify failed') >= 0 ):
+      verboseoutput("Connection error, disable SSL certification verification (probably patched pywbem)")
+      wbemclient = pywbem.WBEMConnection(hosturl, (user,password), no_verification=True)
+    else:
+      verboseoutput("Other pywbem.cim_http.Error, continue as normal")
+      wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
+  except:
+    verboseoutput("Other connection error, continue as normal")
+    wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
   else:
     verboseoutput("Connection worked")
     wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
