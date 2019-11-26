@@ -1,0 +1,18 @@
+# @file python3check.yml
+---
+name: Python3 check
+
+# Trigger the workflow on push or pull request
+on: [push, pull_request]
+
+jobs:
+  python3-help:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Launch script with --help
+      run: |
+        ./check_esxi_hardware.py --help
