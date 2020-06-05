@@ -39,6 +39,7 @@
 # Copyright (c) 2015 Stanislav German-Evtushenko
 # Copyright (c) 2015 Stefan Roos
 # Copyright (c) 2018 Peter Newman
+# Copyright (c) 2019 Luca Berra
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -267,6 +268,10 @@
 #@ Date   : 20190701
 #@ Author : Phil Randal (phil.randal@gmail.com)
 #@ Reason : Fix lookup of warranty info for Dell (again)
+#@---------------------------------------------------
+#@ Date   : 20191115
+#@ Author : Luca Berra
+#@ Reason : Add option to ignore chassis intrusion (Supermicro)
 
 from __future__ import print_function
 import sys
@@ -276,7 +281,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20190701'
+version = '20191115'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -376,6 +381,7 @@ get_current = True
 get_temp    = True
 get_fan     = True
 get_lcd     = True
+get_intrusion = True
 
 # define exit codes
 ExitOK = 0
@@ -500,7 +506,7 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd
+  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion
   usage = "usage: %prog -H hostname -U username -P password [-C port -V vendor -v -p -I XX -i list,list -r]\n" \
     "example: %prog -H hostname -U root -P password -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
@@ -542,6 +548,8 @@ def getopts() :
       help="don't collect fan performance data")
   group2.add_option("--no-lcd", action="store_false", dest="get_lcd", default=True, \
       help="don't collect lcd/front display status")
+  group2.add_option("--no-intrusion", action="store_false", dest="get_intrusion", default=True, \
+      help="don't collect chassis intrusion status")
 
   parser.add_option_group(group1)
   parser.add_option_group(group2)
@@ -601,6 +609,7 @@ def getopts() :
     get_temp=options.get_temp
     get_fan=options.get_fan
     get_lcd=options.get_lcd
+    get_intrusion=options.get_intrusion
 
   # if user or password starts with 'file:', use the first string in file as user, second as password
   if (re.match('^file:', user) or re.match('^file:', password)):
@@ -643,6 +652,18 @@ if not get_lcd:
   ignore_list.append("System Board 1 VGA Cable Pres 0: Connected")
   ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Connected")
   ignore_list.append("Front Panel Board 1 FP LCD Cable 0: Config Error")
+
+# Append chassis intrusion related elements to ignore list if --no-intrusion was used
+verboseoutput("Chassis Intrusion Status: %s" % get_intrusion)
+if not get_intrusion:
+  ignore_list.append("System Chassis 1 Chassis Intru: General Chassis intrusion")
+  ignore_list.append("System Chassis 1 Chassis Intru: Drive Bay intrusion")
+  ignore_list.append("System Chassis 1 Chassis Intru: I/O Card area intrusion")
+  ignore_list.append("System Chassis 1 Chassis Intru: Processor area intrusion")
+  ignore_list.append("System Chassis 1 Chassis Intru: System unplugged from LAN")
+  ignore_list.append("System Chassis 1 Chassis Intru: Unauthorized dock")
+  ignore_list.append("System Chassis 1 Chassis Intru: FAN area intrusion")
+  ignore_list.append("System Chassis 1 Chassis Intru: Unknown")
 
 # connection to host
 verboseoutput("Connection to "+hosturl)
