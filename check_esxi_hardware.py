@@ -15,16 +15,14 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301, USA.
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 # Pre-req : pywbem
 #
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2019 Claudio Kuenzler
+# Copyright (c) 2010-2020 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -39,14 +37,14 @@
 # Copyright (c) 2015 Stanislav German-Evtushenko
 # Copyright (c) 2015 Stefan Roos
 # Copyright (c) 2018 Peter Newman
-# Copyright (c) 2019 Luca Berra
+# Copyright (c) 2020 Luca Berra
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
 #   http://www.vmware.com/support/developer/cim-sdk/smash/u2/ga/apirefdoc/
 #
-# The VMware 5.x CIM API is documented here:
-#   http://pubs.vmware.com/vsphere-50/index.jsp?nav=/5_1_1
+# The VMware 5.5 and above CIM API is documented here:
+#   https://code.vmware.com/apis/207/cim
 #
 # This monitoring plugin is maintained and documented here:
 #   https://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php
@@ -269,9 +267,14 @@
 #@ Author : Phil Randal (phil.randal@gmail.com)
 #@ Reason : Fix lookup of warranty info for Dell (again)
 #@---------------------------------------------------
-#@ Date   : 20191115
+#@ Date   : 20200605
 #@ Author : Luca Berra
 #@ Reason : Add option to ignore chassis intrusion (Supermicro)
+#@---------------------------------------------------
+#@ Date   : 20200605
+#@ Author : Claudio Kuenzler
+#@ Reason : Add parameter (-S) for custom SSL/TLS protocol version
+#@---------------------------------------------------
 
 from __future__ import print_function
 import sys
@@ -281,7 +284,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20191115'
+version = '20200605'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -506,22 +509,23 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,cimport,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion
-  usage = "usage: %prog -H hostname -U username -P password [-C port -V vendor -v -p -I XX -i list,list -r]\n" \
+  global hosturl,hostname,cimport,sslproto,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion
+  usage = "usage: %prog -H hostname -U username -P password [-C port -S proto -V vendor -v -p -I XX -i list,list -r]\n" \
     "example: %prog -H hostname -U root -P password -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
-    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --vendor=system --verbose --perfdata --html=XX]\n"
+    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --sslproto=version --vendor=system --verbose --perfdata --html=XX]\n"
 
   parser = OptionParser(usage=usage, version="%prog "+version)
   group1 = OptionGroup(parser, 'Mandatory parameters')
   group2 = OptionGroup(parser, 'Optional parameters')
 
-  group1.add_option("-H", "--host", dest="host", help="report on HOST", metavar="HOST")
+  group1.add_option("-H", "--host", dest="host", help="connect to HOST", metavar="HOST")
   group1.add_option("-U", "--user", dest="user", help="user to connect as", metavar="USER")
   group1.add_option("-P", "--pass", dest="password", \
       help="password, if password matches file:<path>, first line of given file will be used as password", metavar="PASS")
 
   group2.add_option("-C", "--cimport", dest="cimport", help="CIM port (default 5989)", metavar="CIMPORT")
+  group2.add_option("-S", "--sslproto", dest="sslproto", help="SSL/TLS protocol version to overwrite system default: SSLv2, SSLv3, TLSv1.0, TLSv1.1, TLSv1.2, TLSv1.3", metavar="SSLPROTO")
   group2.add_option("-V", "--vendor", dest="vendor", help="Vendor code: auto, dell, hp, ibm, intel, or unknown (default)", \
       metavar="VENDOR", type='choice', choices=['auto','dell','hp','ibm','intel','unknown'],default="unknown")
   group2.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, \
@@ -596,6 +600,7 @@ def getopts() :
     user=options.user
     password=options.password
     cimport=options.cimport
+    sslproto=options.sslproto
     vendor=options.vendor.lower()
     verbose=options.verbose
     perfdata=options.perfdata
@@ -641,10 +646,30 @@ if os_platform != "win32":
     print('UNKNOWN: Execution time too long!')
     sys.exit(ExitUnknown)
 
+# Use non-default CIM port
 if cimport:
   verboseoutput("Using manually defined CIM port "+cimport)
   hosturl += ':'+cimport 
-  
+
+# Use non-default SSL protocol version
+if sslproto:
+  verboseoutput("Using non-default SSL protocol: "+sslproto)
+  allowed_protos = ["SSLv2", "SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2", "TLSv1.3"]
+  if any(proto.lower() == sslproto.lower() for proto in allowed_protos):
+    import os
+    sslconfpath = '/tmp/'+hostname+'_openssl.conf'
+    verboseoutput("Creating OpenSSL config file: "+sslconfpath)
+    try:
+      with open(sslconfpath, 'w') as config_file:
+          config_file.write("openssl_conf = openssl_init\n[openssl_init]\nssl_conf = ssl_configuration\n[ssl_configuration]\nsystem_default = tls_system_default\n[tls_system_default]\nMinProtocol = "+sslproto+"\n")
+    except Exception as e:
+      print('CRITICAL: An error occured while trying to write ssl config file: %s (%s)' % (sslconfpath, e))
+      sys.exit(ExitCritical)
+    os.environ["OPENSSL_CONF"] = sslconfpath
+  else:
+    print('CRITICAL: Invalid SSL protocol version given!')
+    sys.exit(ExitCritical)
+
 # Append lcd related elements to ignore list if --no-lcd was used
 verboseoutput("LCD Status: %s" % get_lcd)
 if not get_lcd:
@@ -717,6 +742,10 @@ if vendor=='auto':
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
+  except pywbem._exceptions.ConnectionError as args:
+    GlobalStatus = ExitUnknown
+    print("UNKNOWN: {}".format(args))
+    sys.exit (GlobalStatus)
   except pywbem.cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
@@ -748,6 +777,10 @@ for classe in ClassesToCheck :
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
+  except pywbem._exceptions.ConnectionError as args:
+    GlobalStatus = ExitUnknown
+    print("UNKNOWN: {}".format(args))
+    sys.exit (GlobalStatus)
   except pywbem.cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
