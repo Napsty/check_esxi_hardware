@@ -742,6 +742,9 @@ if vendor=='auto':
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
+  except pywbem._exceptions.ConnectionError as args:
+    print("UNKNOWN: {}".format(args))
+    sys.exit (ExitUnknown)
   except pywbem.cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
@@ -773,6 +776,9 @@ for classe in ClassesToCheck :
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
+  except pywbem._exceptions.ConnectionError as args:
+    print("UNKNOWN: {}".format(args))
+    sys.exit (ExitUnknown)
   except pywbem.cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
