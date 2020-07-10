@@ -275,6 +275,11 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Add parameter (-S) for custom SSL/TLS protocol version
 #@---------------------------------------------------
+#@ Date   : 20200710
+#@ Author : Claudio Kuenzler
+#@ Reason : Improve missing mandatory parameter error text (issue #47)
+#@          Delete temporary openssl config file after use (issue #48)
+#@---------------------------------------------------
 
 from __future__ import print_function
 import sys
@@ -284,7 +289,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20200605'
+version = '20200710'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -585,7 +590,7 @@ def getopts() :
     mandatories = ['host', 'user', 'password']
     for m in mandatories:
       if not options.__dict__[m]:
-        print("mandatory parameter '--" + m + "' is missing\n")
+        print("mandatory option '" + m + "' not defined. read usage in help.\n")
         parser.print_help()
         sys.exit(-1)
 
@@ -1012,6 +1017,10 @@ if perfdata:
 # sanitise perfdata - don't output "|" if nothing to report
 if perf == '|':
   perf = ''
+
+# Cleanup temporary openssl config
+if sslproto:
+  os.remove(sslconfpath)
 
 if GlobalStatus == ExitOK :
   print("OK - Server: %s %s %s%s" % (server_info, SerialNumber, bios_info, perf))
