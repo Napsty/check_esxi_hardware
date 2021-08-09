@@ -22,7 +22,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2020 Claudio Kuenzler
+# Copyright (c) 2010-2021 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -280,6 +280,11 @@
 #@ Reason : Improve missing mandatory parameter error text (issue #47)
 #@          Delete temporary openssl config file after use (issue #48)
 #@---------------------------------------------------
+#@ Date   : 20210809
+#@ Author : Claudio Kuenzler
+#@ Reason : Fix TLSv1 usage (issue #51)
+#@---------------------------------------------------
+
 
 from __future__ import print_function
 import sys
@@ -289,7 +294,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20200710'
+version = '20210809'
 
 NS = 'root/cimv2'
 hosturl = ''
