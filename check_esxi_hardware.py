@@ -22,7 +22,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2020 Claudio Kuenzler
+# Copyright (c) 2010-2021 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -280,6 +280,11 @@
 #@ Reason : Improve missing mandatory parameter error text (issue #47)
 #@          Delete temporary openssl config file after use (issue #48)
 #@---------------------------------------------------
+#@ Date   : 20210809
+#@ Author : Claudio Kuenzler
+#@ Reason : Fix TLSv1 usage (issue #51)
+#@---------------------------------------------------
+
 
 from __future__ import print_function
 import sys
@@ -289,7 +294,7 @@ import re
 import pkg_resources
 from optparse import OptionParser,OptionGroup
 
-version = '20200710'
+version = '20210809'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -530,7 +535,7 @@ def getopts() :
       help="password, if password matches file:<path>, first line of given file will be used as password", metavar="PASS")
 
   group2.add_option("-C", "--cimport", dest="cimport", help="CIM port (default 5989)", metavar="CIMPORT")
-  group2.add_option("-S", "--sslproto", dest="sslproto", help="SSL/TLS protocol version to overwrite system default: SSLv2, SSLv3, TLSv1.0, TLSv1.1, TLSv1.2, TLSv1.3", metavar="SSLPROTO")
+  group2.add_option("-S", "--sslproto", dest="sslproto", help="SSL/TLS protocol version to overwrite system default: SSLv2, SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3", metavar="SSLPROTO")
   group2.add_option("-V", "--vendor", dest="vendor", help="Vendor code: auto, dell, hp, ibm, intel, or unknown (default)", \
       metavar="VENDOR", type='choice', choices=['auto','dell','hp','ibm','intel','unknown'],default="unknown")
   group2.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, \
@@ -659,7 +664,7 @@ if cimport:
 # Use non-default SSL protocol version
 if sslproto:
   verboseoutput("Using non-default SSL protocol: "+sslproto)
-  allowed_protos = ["SSLv2", "SSLv3", "TLSv1.0", "TLSv1.1", "TLSv1.2", "TLSv1.3"]
+  allowed_protos = ["SSLv2", "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"]
   if any(proto.lower() == sslproto.lower() for proto in allowed_protos):
     import os
     sslconfpath = '/tmp/'+hostname+'_openssl.conf'
