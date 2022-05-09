@@ -284,17 +284,22 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Fix TLSv1 usage (issue #51)
 #@---------------------------------------------------
-
+#@ Date   : 20220509
+#@ Author : Marco Markgraf
+#@ Reason : Needed JSON-output to use with Zabbix
+#@---------------------------------------------------
 
 from __future__ import print_function
+from dis import pretty_flags
 import sys
 import time
 import pywbem
 import re
 import pkg_resources
+import json
 from optparse import OptionParser,OptionGroup
 
-version = '20210809'
+version = '20220509'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -342,6 +347,7 @@ sensor_Type = {
 }
 
 data = []
+xdata = {}
 
 perf_Prefix = {
   1:'Pow',
@@ -372,6 +378,10 @@ vendor='unknown'
 
 # verbose
 verbose=False
+
+# output json
+outputformat='string'
+pretty=False
 
 # Produce performance data output for nagios
 perfdata=False
@@ -519,11 +529,11 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,hostname,cimport,sslproto,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion
+  global hosturl,hostname,cimport,sslproto,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion,outputformat,pretty
   usage = "usage: %prog -H hostname -U username -P password [-C port -S proto -V vendor -v -p -I XX -i list,list -r]\n" \
     "example: %prog -H hostname -U root -P password -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
-    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --sslproto=version --vendor=system --verbose --perfdata --html=XX]\n"
+    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --sslproto=version --vendor=system --verbose --perfdata --html=XX --outputformat=json --pretty]\n"
 
   parser = OptionParser(usage=usage, version="%prog "+version)
   group1 = OptionGroup(parser, 'Mandatory parameters')
@@ -564,6 +574,10 @@ def getopts() :
       help="don't collect lcd/front display status")
   group2.add_option("--no-intrusion", action="store_false", dest="get_intrusion", default=True, \
       help="don't collect chassis intrusion status")
+  group2.add_option("--outputformat", dest="outputformat", help="'string' (default) or 'json'", \
+      metavar="FORMAT", type='choice', choices=['string','json'],default="string")
+  group2.add_option("--pretty", action="store_true", dest="pretty", default=False, \
+      help="return data as a pretty-printed json-array")
 
   parser.add_option_group(group1)
   parser.add_option_group(group2)
@@ -610,14 +624,16 @@ def getopts() :
     user=options.user
     password=options.password
     cimport=options.cimport
+    ignore_list=options.ignore.split(',')
+    outputformat=options.outputformat
+    pretty=options.pretty
+    perfdata=options.perfdata
+    regex=options.regex
     sslproto=options.sslproto
+    timeout=options.timeout
+    urlise_country=options.urlise_country.lower()
     vendor=options.vendor.lower()
     verbose=options.verbose
-    perfdata=options.perfdata
-    urlise_country=options.urlise_country.lower()
-    timeout=options.timeout
-    ignore_list=options.ignore.split(',')
-    regex=options.regex
     get_power=options.get_power
     get_volts=options.get_volts
     get_current=options.get_current
@@ -659,7 +675,7 @@ if os_platform != "win32":
 # Use non-default CIM port
 if cimport:
   verboseoutput("Using manually defined CIM port "+cimport)
-  hosturl += ':'+cimport 
+  hosturl += ':'+cimport
 
 # Use non-default SSL protocol version
 if sslproto:
@@ -778,7 +794,7 @@ for classe in ClassesToCheck :
   verboseoutput("Check classe "+classe)
   try:
     instance_list = wbemclient.EnumerateInstances(classe)
-  except pywbem.cim_operations.CIMError as args:
+  except pywbem._cim_operations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
       print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
@@ -791,7 +807,7 @@ for classe in ClassesToCheck :
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
-  except pywbem.cim_http.AuthError as arg:
+  except pywbem._cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
     print("UNKNOWN: Authentication Error")
@@ -823,6 +839,8 @@ for classe in ClassesToCheck :
             + str(instance[u'ReleaseDate'].datetime.date())
         verboseoutput("    VersionString = "+instance[u'VersionString'])
 
+        xdata['Bios Info'] = bios_info
+
       elif elementName == 'Chassis' :
         man = instance[u'Manufacturer']
         if man is None :
@@ -837,13 +855,16 @@ for classe in ClassesToCheck :
           model = instance[u'Model']
           if model:
             verboseoutput("    Model = "+model)
-            server_info +=  model + ' s/n:'
+            #server_info +=  model + ' s/n:'
+            server_info +=  model
 
       elif elementName == 'Server Blade' :
         SerialNumber = instance[u'SerialNumber']
         if SerialNumber:
           verboseoutput("    SerialNumber = "+SerialNumber)
           isblade = "yes"
+
+      xdata['SerialNumber'] = SerialNumber
 
       # Report detail of Numeric Sensors and generate nagios perfdata
 
@@ -886,27 +907,33 @@ for classe in ClassesToCheck :
             if units == 7:            # Watts
               if get_power:
                 data.append( ("%s=%g;%g;%g " % (perf_el, cr, utnc, utc),1) )
+                xdata[perf_el] = { 'Unit': 'Watt', 'Value': cr, 'warn' : utnc, 'crit': utc }
             elif units == 6:          # Current
               if get_current:
                 data.append( ("%s=%g;%g;%g " % (perf_el, cr, utnc, utc),3) )
+                xdata[perf_el] = { 'Unit': 'Ampere', 'Value': cr, 'warn' : utnc, 'crit': utc }
 
           # PSU Voltage
           elif sensorType == 3:               # Voltage
             if get_volts:
               data.append( ("%s=%g;%g;%g " % (perf_el, cr, utnc, utc),2) )
+              xdata[perf_el] = { 'Unit': 'Volt', 'Value': cr, 'warn' : utnc, 'crit': utc }
 
           # Temperatures
           elif sensorType == 2:               # Temperature
             if get_temp:
               data.append( ("%s=%g;%g;%g " % (perf_el, cr, utnc, utc),4) )
+              xdata[perf_el] = { 'Value': cr, 'warn' : utnc, 'crit': utc }
 
           # Fan speeds
           elif sensorType == 5:               # Tachometer
             if get_fan:
-              if units == 65:           # percentage
+              if units == 65:                 # percentage
                 data.append( ("%s=%g%%;%g;%g " % (perf_el, cr, utnc, utc),6) )
+                xdata[perf_el] = { 'Unit': '%', 'Value': cr, 'warn' : utnc, 'crit': utc }
               else:
                 data.append( ("%s=%g;%g;%g " % (perf_el, cr, utnc, utc),5) )
+                xdata[perf_el] = { 'Value': cr, 'warn' : utnc, 'crit': utc }
 
       elif classe == "CIM_Processor" :
         verboseoutput("    Family = %d" % instance['Family'])
@@ -1027,13 +1054,36 @@ if perf == '|':
 if sslproto:
   os.remove(sslconfpath)
 
+xdata['GlobalStatus'] = GlobalStatus
+
 if GlobalStatus == ExitOK :
-  print("OK - Server: %s %s %s%s" % (server_info, SerialNumber, bios_info, perf))
+  if outputformat == 'string':
+    print("OK - Server: %s %s %s%s" % (server_info, 's/n: ' + SerialNumber, bios_info, perf))
+  elif outputformat == 'json' and not pretty:
+    print(json.dumps(xdata, sort_keys=True))
+  elif outputformat == 'json' and pretty:
+    print(json.dumps(xdata, sort_keys=True, indent=4))
+  else:
+    print("OK - Server: %s %s %s%s" % (server_info, 's/n: ' + SerialNumber, bios_info, perf))
 
 elif GlobalStatus == ExitUnknown :
-  print("UNKNOWN: %s" % (ExitMsg)) #ARR
+  if outputformat == 'string':
+    print("OK - Server: %s %s %s%s" % (server_info, 's/n: ' + SerialNumber, bios_info, perf))
+  elif outputformat == 'json' and not pretty:
+    print(json.dumps(xdata, sort_keys=True))
+  elif outputformat == 'json' and pretty:
+    print(json.dumps(xdata, sort_keys=True, indent=4))
+  else:
+    print("UNKNOWN: %s" % (ExitMsg)) #ARR
 
 else:
-  print("%s - Server:  %s %s %s%s" % (ExitMsg, server_info, SerialNumber, bios_info, perf))
+  if outputformat == 'string':
+    print("OK - Server: %s %s %s%s" % (server_info, 's/n: ' + SerialNumber, bios_info, perf))
+  elif outputformat == 'json' and not pretty:
+    print(json.dumps(xdata, sort_keys=True))
+  elif outputformat == 'json' and pretty:
+    print(json.dumps(xdata, sort_keys=True, indent=4))
+  else:
+    print("%s - Server:  %s %s %s%s" % (ExitMsg, server_info, 's/n: ' + SerialNumber, bios_info, perf))
 
 sys.exit (GlobalStatus)
