@@ -290,8 +290,7 @@
 #@---------------------------------------------------
 
 from __future__ import print_function
-from dis import pretty_flags
-import sys
+from dis import pretty_flagsimport sys
 import time
 import pywbem
 import re
