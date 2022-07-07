@@ -1036,6 +1036,7 @@ if (urlise_country != '') :
 # If this is a blade server, also output chassis serial number as additional info
 if (isblade == "yes") :
   SerialNumber += " Chassis S/N: %s " % (SerialChassis)
+  xdata['ChassisSerialNumber'] = SerialChassis
 
 # Output performance data
 perf = '|'
