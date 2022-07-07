@@ -379,7 +379,7 @@ vendor='unknown'
 verbose=False
 
 # output json
-outputformat='string'
+format='string'
 pretty=False
 
 # Produce performance data output for nagios
@@ -528,19 +528,19 @@ def verboseoutput(message) :
 # ----------------------------------------------------------------------
 
 def xdataprint():
-  if outputformat == 'json' and not pretty:
+  if format == 'json' and not pretty:
     print(json.dumps(xdata, sort_keys=True))
-  if outputformat == 'json' and pretty:
+  if format == 'json' and pretty:
     print(json.dumps(xdata, sort_keys=True, indent=4))
 
 # ----------------------------------------------------------------------
 
 def getopts() :
-  global hosturl,hostname,cimport,sslproto,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion,outputformat,pretty
+  global hosturl,hostname,cimport,sslproto,user,password,vendor,verbose,perfdata,urlise_country,timeout,ignore_list,regex,get_power,get_volts,get_current,get_temp,get_fan,get_lcd,get_intrusion,format,pretty
   usage = "usage: %prog -H hostname -U username -P password [-C port -S proto -V vendor -v -p -I XX -i list,list -r]\n" \
     "example: %prog -H hostname -U root -P password -C 5989 -V auto -I uk\n\n" \
     "or, verbosely:\n\n" \
-    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --sslproto=version --vendor=system --verbose --perfdata --html=XX --outputformat=json --pretty]\n"
+    "usage: %prog --host=hostname --user=username --pass=password [--cimport=port --sslproto=version --vendor=system --verbose --perfdata --html=XX --format=json --pretty]\n"
 
   parser = OptionParser(usage=usage, version="%prog "+version)
   group1 = OptionGroup(parser, 'Mandatory parameters')
@@ -581,7 +581,7 @@ def getopts() :
       help="don't collect lcd/front display status")
   group2.add_option("--no-intrusion", action="store_false", dest="get_intrusion", default=True, \
       help="don't collect chassis intrusion status")
-  group2.add_option("--outputformat", dest="outputformat", help="'string' (default) or 'json'", \
+  group2.add_option("--format", dest="format", help="'string' (default) or 'json'", \
       metavar="FORMAT", type='choice', choices=['string','json'],default="string")
   group2.add_option("--pretty", action="store_true", dest="pretty", default=False, \
       help="return data as a pretty-printed json-array")
@@ -632,7 +632,7 @@ def getopts() :
     password=options.password
     cimport=options.cimport
     ignore_list=options.ignore.split(',')
-    outputformat=options.outputformat
+    format=options.format
     pretty=options.pretty
     perfdata=options.perfdata
     regex=options.regex
@@ -1065,19 +1065,19 @@ if sslproto:
 xdata['GlobalStatus'] = GlobalStatus
 
 if GlobalStatus == ExitOK :
-  if outputformat == 'string':
+  if format == 'string':
     print("OK - Server: %s %s %s%s" % (server_info, 's/n: ' + SerialNumber, bios_info, perf))
   else:
     xdataprint()
 
 elif GlobalStatus == ExitUnknown :
-  if outputformat == 'string':
+  if format == 'string':
     print("UNKNOWN: %s" % (ExitMsg)) #ARR
   else:
     xdataprint()
 
 else:
-  if outputformat == 'string':
+  if format == 'string':
     print("%s - Server:  %s %s %s%s" % (ExitMsg, server_info, 's/n: ' + SerialNumber, bios_info, perf))
   else:
     xdataprint()
