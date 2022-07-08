@@ -22,7 +22,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2021 Claudio Kuenzler
+# Copyright (c) 2010-2022 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -38,6 +38,7 @@
 # Copyright (c) 2015 Stefan Roos
 # Copyright (c) 2018 Peter Newman
 # Copyright (c) 2020 Luca Berra
+# Copyright (c) 2022 Marco Markgraf
 #
 # The VMware 4.1 CIM API is documented here:
 #   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
@@ -286,7 +287,7 @@
 #@---------------------------------------------------
 #@ Date   : 20220509
 #@ Author : Marco Markgraf
-#@ Reason : Needed JSON-output to use with Zabbix
+#@ Reason : Added JSON-output (Zabbix needs it)
 #@---------------------------------------------------
 
 from __future__ import print_function
@@ -298,7 +299,7 @@ import pkg_resources
 import json
 from optparse import OptionParser,OptionGroup
 
-version = '20220509'
+version = '20220708'
 
 NS = 'root/cimv2'
 hosturl = ''
