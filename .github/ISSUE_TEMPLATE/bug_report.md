@@ -15,8 +15,8 @@ I confirm, I have cleared the server's local IPMI cache (`localcli hardware ipmi
 **Describe the bug**
 A clear and concise description of what the bug is. 
 
-**Show the full plugin output, including the command with -V parameter**
-Run the plugin with `-V` parameter and show the full output (including command) here. Obviously obfuscate credentials.
+**Show the full plugin output, including the command with -v parameter**
+Run the plugin with `-v` parameter and show the full output (including command) here. Obviously obfuscate credentials.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
