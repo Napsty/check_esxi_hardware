@@ -289,6 +289,10 @@
 #@ Author : Marco Markgraf
 #@ Reason : Added JSON-output (Zabbix needs it)
 #@---------------------------------------------------
+#@ Date   : 20221230
+#@ Author : Claudio Kuenzler
+#@ Reason : Fix bug when missing S/N (issue #68)
+#@---------------------------------------------------
 
 from __future__ import print_function
 import sys
@@ -299,7 +303,7 @@ import pkg_resources
 import json
 from optparse import OptionParser,OptionGroup
 
-version = '20220708'
+version = '20221230'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -863,7 +867,6 @@ for classe in ClassesToCheck :
           model = instance[u'Model']
           if model:
             verboseoutput("    Model = "+model)
-            #server_info +=  model + ' s/n:'
             server_info +=  model
 
       elif elementName == 'Server Blade' :
@@ -1067,7 +1070,7 @@ xdata['GlobalStatus'] = GlobalStatus
 
 if GlobalStatus == ExitOK :
   if format == 'string':
-    print("OK - Server: %s %s %s%s" % (server_info, 's/n: ' + SerialNumber, bios_info, perf))
+    print("OK - Server: %s s/n: %s %s%s" % (server_info, SerialNumber, bios_info, perf))
   else:
     xdataprint()
 
