@@ -293,13 +293,17 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Fix bug when missing S/N (issue #68)
 #@---------------------------------------------------
+#@ Date   : 20240223
+#@ Author : Julian Petri
+#@ Reason : Fix deprecation of pkg_resources (issue #55)
+#@---------------------------------------------------
 
 from __future__ import print_function
 import sys
 import time
 import pywbem
 import re
-import pkg_resources
+import importlib.metadata
 import json
 from optparse import OptionParser,OptionGroup
 
@@ -734,7 +738,7 @@ verboseoutput("Connection to "+hosturl)
 try:
   pywbemversion = pywbem.__version__
 except:
-  pywbemversion = pkg_resources.get_distribution("pywbem").version
+  pywbemversion = importlib.metadata.version("pywbem")
 else:
   pywbemversion = pywbem.__version__
 verboseoutput("Found pywbem version "+pywbemversion)
