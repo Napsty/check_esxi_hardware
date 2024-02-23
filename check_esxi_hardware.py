@@ -295,7 +295,7 @@
 #@---------------------------------------------------
 #@ Date   : 20240223
 #@ Author : Julian Petri
-#@ Reason : Fix deprecation of pkg_resources (issue #55)
+#@ Reason : Fix deprecation of pkg_resources (issue #72)
 #@---------------------------------------------------
 
 from __future__ import print_function
