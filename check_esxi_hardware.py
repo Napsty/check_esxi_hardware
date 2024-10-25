@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 #
 # Script for checking global health of host running VMware ESX/ESXi
@@ -22,7 +22,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2022 Claudio Kuenzler
+# Copyright (c) 2010-2024 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -293,17 +293,21 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Fix bug when missing S/N (issue #68)
 #@---------------------------------------------------
+#@ Date   : 20241025
+#@ Author : Claudio Kuenzler
+#@ Reason : Fix pkg_resources deprecation warning
+#           Remove python2 compatibility
+#           Remove pywbem 0.7.0 compatibility
+#@---------------------------------------------------
 
-from __future__ import print_function
 import sys
 import time
 import pywbem
 import re
-import pkg_resources
 import json
 from optparse import OptionParser,OptionGroup
 
-version = '20221230'
+version = '20241025'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -729,30 +733,10 @@ if not get_intrusion:
   ignore_list.append("System Chassis 1 Chassis Intru: Unknown")
 
 # connection to host
-verboseoutput("Connection to "+hosturl)
-# pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
-try:
-  pywbemversion = pywbem.__version__
-except:
-  pywbemversion = pkg_resources.get_distribution("pywbem").version
-else:
-  pywbemversion = pywbem.__version__
+pywbemversion = pywbem.__version__
 verboseoutput("Found pywbem version "+pywbemversion)
-
-if '0.7.' in pywbemversion:
-  try:
-    conntest = pywbem.WBEMConnection(hosturl, (user,password))
-    c = conntest.EnumerateInstances('CIM_Card')
-  except:
-    #raise
-    verboseoutput("Connection error, disable SSL certificate verification (probably patched pywbem)")
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), no_verification=True)
-  else:
-    verboseoutput("Connection worked")
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
-# pywbem 0.8.0 and later
-else:
-  wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
+verboseoutput("Connection to "+hosturl)
+wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
