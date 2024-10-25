@@ -19,16 +19,3 @@ jobs:
     - name: Launch script with --help
       run: |
         ./check_esxi_hardware.py --help
-  python3-pywbem-0_8_1:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install latest pywbem from pip
-      run: |
-        sudo apt-get install -qq -yy python3 python3-pip
-        pip3 install pywbem==0.8.1
-    - name: Verify python sys.path
-      run: (echo "import sys"; echo "print(', '.join(sys.path))") | python3
-    - name: Launch script with --help
-      run: |
-        ./check_esxi_hardware.py --help
