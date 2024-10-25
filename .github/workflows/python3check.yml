@@ -6,11 +6,6 @@ name: Python3 check
 on: [push, pull_request]
 
 jobs:
-  simple-job:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Simple hello world
-        run: echo "Hello World"
   python3-pywbem-latest:
     runs-on: ubuntu-latest
     steps:
