@@ -19,7 +19,7 @@ jobs:
     - name: Launch script with --help
       run: |
         ./check_esxi_hardware.py --help
-  python3-pywbem-0.8.0:
+  python3-pywbem-0_8_0:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
