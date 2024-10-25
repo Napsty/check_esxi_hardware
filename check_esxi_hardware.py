@@ -40,12 +40,11 @@
 # Copyright (c) 2020 Luca Berra
 # Copyright (c) 2022 Marco Markgraf
 #
-# The VMware 4.1 CIM API is documented here:
-#   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
-#   http://www.vmware.com/support/developer/cim-sdk/smash/u2/ga/apirefdoc/
-#
-# The VMware 5.5 and above CIM API is documented here:
-#   https://code.vmware.com/apis/207/cim
+# The VMware CIM API is documented here (as of October 2024):
+#   https://docs.vmware.com/en/VMware-vSphere/7.0/vsphere-cim-smash-server-management-api-programming-guide/GUID-2725D01E-AE02-4EF2-9E98-5AB82AA0349A.html
+
+# The CIM classes are documented here (as of October 2024):
+#   https://vdc-download.vmware.com/vmwb-repository/dcr-public/27c1c014-7315-4d6b-8e6b-292130a79b3c/36aca268-99fa-4916-b993-a077de55cbf1/CIM_API_Reference/index.html
 #
 # This monitoring plugin is maintained and documented here:
 #   https://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php
