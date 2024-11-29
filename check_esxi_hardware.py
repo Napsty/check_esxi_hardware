@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 #
 # Script for checking global health of host running VMware ESX/ESXi
@@ -22,7 +22,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2022 Claudio Kuenzler
+# Copyright (c) 2010-2024 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -40,12 +40,11 @@
 # Copyright (c) 2020 Luca Berra
 # Copyright (c) 2022 Marco Markgraf
 #
-# The VMware 4.1 CIM API is documented here:
-#   http://www.vmware.com/support/developer/cim-sdk/4.1/smash/cim_smash_410_prog.pdf
-#   http://www.vmware.com/support/developer/cim-sdk/smash/u2/ga/apirefdoc/
-#
-# The VMware 5.5 and above CIM API is documented here:
-#   https://code.vmware.com/apis/207/cim
+# The VMware CIM API is documented here (as of October 2024):
+#   https://docs.vmware.com/en/VMware-vSphere/7.0/vsphere-cim-smash-server-management-api-programming-guide/GUID-2725D01E-AE02-4EF2-9E98-5AB82AA0349A.html
+
+# The CIM classes are documented here (as of October 2024):
+#   https://vdc-download.vmware.com/vmwb-repository/dcr-public/27c1c014-7315-4d6b-8e6b-292130a79b3c/36aca268-99fa-4916-b993-a077de55cbf1/CIM_API_Reference/index.html
 #
 # This monitoring plugin is maintained and documented here:
 #   https://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php
@@ -293,17 +292,21 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Fix bug when missing S/N (issue #68)
 #@---------------------------------------------------
+#@ Date   : 20241025
+#@ Author : Claudio Kuenzler
+#@ Reason : Fix pkg_resources deprecation warning
+#           Remove python2 compatibility
+#           Remove pywbem 0.7.0 compatibility
+#@---------------------------------------------------
 
-from __future__ import print_function
 import sys
 import time
 import pywbem
 import re
-import pkg_resources
 import json
 from optparse import OptionParser,OptionGroup
 
-version = '20221230'
+version = '20241025'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -729,30 +732,10 @@ if not get_intrusion:
   ignore_list.append("System Chassis 1 Chassis Intru: Unknown")
 
 # connection to host
-verboseoutput("Connection to "+hosturl)
-# pywbem 0.7.0 handling is special, some patched 0.7.0 installations work differently
-try:
-  pywbemversion = pywbem.__version__
-except:
-  pywbemversion = pkg_resources.get_distribution("pywbem").version
-else:
-  pywbemversion = pywbem.__version__
+pywbemversion = pywbem.__version__
 verboseoutput("Found pywbem version "+pywbemversion)
-
-if '0.7.' in pywbemversion:
-  try:
-    conntest = pywbem.WBEMConnection(hosturl, (user,password))
-    c = conntest.EnumerateInstances('CIM_Card')
-  except:
-    #raise
-    verboseoutput("Connection error, disable SSL certificate verification (probably patched pywbem)")
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password), no_verification=True)
-  else:
-    verboseoutput("Connection worked")
-    wbemclient = pywbem.WBEMConnection(hosturl, (user,password))
-# pywbem 0.8.0 and later
-else:
-  wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
+verboseoutput("Connection to "+hosturl)
+wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:

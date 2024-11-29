@@ -6,109 +6,16 @@ name: Python3 check
 on: [push, pull_request]
 
 jobs:
-  simple-output:
+  python3-pywbem-latest:
     runs-on: ubuntu-latest
     steps:
-      - name: Simple hello world
-        run: echo "Hello World"
-#  python3-pywbem-latest:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v1
-#    - uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.8'
-#    - name: Install latest pywbem from pip
-#      run: |
-#        sudo apt-get install -qq -yy python3-pip
-#        pip3 install pywbem
-#    - name: Set environment PYTHONPATH
-#      run: |
-#        export PYTHONPATH=/opt/hostedtoolcache/Python/3.8.0/x64/lib/python3.8/site-packages
-#    - name: Verify python sys.path
-#      run: (echo "import sys"; echo "print(', '.join(sys.path))") | python
-#    - name: Launch script with --help
-#      run: |
-#        ./check_esxi_hardware.py --help
-#  python3-pywbem-08:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v1
-#    - uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.x'
-#    - name: Install latest pywbem from pip
-#      run: |
-#        sudo apt-get install -qq -yy python3-pip
-#        pip3 install pywbem==0.8.4
-#    - name: Set environment PYTHONPATH
-#      run: |
-#        export PYTHONPATH=/opt/hostedtoolcache/Python
-#    - name: Launch script with --help
-#      run: |
-#        ./check_esxi_hardware.py --help
-#  python3-pywbem-012:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v1
-#    - uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.x'
-#    - name: Install latest pywbem from pip
-#      run: |
-#        sudo apt-get install -qq -yy python3-pip
-#        pip3 install pywbem==0.12.6
-#    - name: Set environment PYTHONPATH
-#      run: |
-#        export PYTHONPATH=/opt/hostedtoolcache/Python
-#    - name: Launch script with --help
-#      run: |
-#        ./check_esxi_hardware.py --help
-#  python3-pywbem-013:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v1
-#    - uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.x'
-#    - name: Install latest pywbem from pip
-#      run: |
-#        sudo apt-get install -qq -yy python3-pip
-#        pip3 install pywbem==0.13.1
-#    - name: Set environment PYTHONPATH
-#      run: |
-#        export PYTHONPATH=/opt/hostedtoolcache/Python
-#    - name: Launch script with --help
-#      run: |
-#        ./check_esxi_hardware.py --help
-#  python3-pywbem-014:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v1
-#    - uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.x'
-#    - name: Install latest pywbem from pip
-#      run: |
-#        sudo apt-get install -qq -yy python3-pip
-#        pip3 install pywbem==0.14.6
-#    - name: Set environment PYTHONPATH
-#      run: |
-#        export PYTHONPATH=/opt/hostedtoolcache/Python
-#    - name: Launch script with --help
-#      run: |
-#        ./check_esxi_hardware.py --help
-#  find-pywbem:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v1
-#    - uses: actions/setup-python@v1
-#      with:
-#        python-version: '3.x'
-#    - name: Install latest pywbem from pip
-#      run: |
-#        sudo apt-get install -qq -yy python-pip
-#        pip install pywbem
-#    - name: Find pywbem module
-#      run: |
-#        find / -name 'pywbem-*'
+    - uses: actions/checkout@v4
+    - name: Install latest pywbem from pip
+      run: |
+        sudo apt-get install -qq -yy python3 python3-pip
+        pip3 install pywbem
+    - name: Verify python sys.path
+      run: (echo "import sys"; echo "print(', '.join(sys.path))") | python3
+    - name: Launch script with --help
+      run: |
+        ./check_esxi_hardware.py --help
