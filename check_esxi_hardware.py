@@ -292,7 +292,7 @@
 #@ Author : Claudio Kuenzler
 #@ Reason : Fix bug when missing S/N (issue #68)
 #@---------------------------------------------------
-#@ Date   : 20241025
+#@ Date   : 20241129
 #@ Author : Claudio Kuenzler
 #@ Reason : Fix pkg_resources deprecation warning
 #           Remove python2 compatibility
@@ -306,7 +306,7 @@ import re
 import json
 from optparse import OptionParser,OptionGroup
 
-version = '20241025'
+version = '20241129'
 
 NS = 'root/cimv2'
 hosturl = ''
