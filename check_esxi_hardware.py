@@ -22,12 +22,12 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2024 Claudio Kuenzler
+# Copyright (c) 2010-2025 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
 # Copyright (c) 2011 Carsten Schoene
-# Copyright (c) 2011-2012 Phil Randal
+# Copyright (c) 2011-2012,2025 Phil Randal
 # Copyright (c) 2011 Fredrik Aslund
 # Copyright (c) 2011 Bertrand Jomin
 # Copyright (c) 2011 Ian Chard
@@ -298,6 +298,10 @@
 #           Remove python2 compatibility
 #           Remove pywbem 0.7.0 compatibility
 #@---------------------------------------------------
+#@ Date   : 20250214
+#@ Author : Phil Randal and Claudio Kuenzler
+#@ Reason : Update to newer pywbem exception call
+#@---------------------------------------------------
 
 import sys
 import time
@@ -306,7 +310,7 @@ import re
 import json
 from optparse import OptionParser,OptionGroup
 
-version = '20241129'
+version = '20250214'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -754,7 +758,7 @@ ExitMsg = ""
 if vendor=='auto':
   try:
     c=wbemclient.EnumerateInstances('CIM_Chassis')
-  except pywbem.cim_operations.CIMError as args:
+  except pywbem._cim_operations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
       print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
@@ -767,7 +771,7 @@ if vendor=='auto':
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
-  except pywbem.cim_http.AuthError as arg:
+  except pywbem._cim_http.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
     print("UNKNOWN: Authentication Error")
