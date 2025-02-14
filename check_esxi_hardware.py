@@ -299,8 +299,8 @@
 #           Remove pywbem 0.7.0 compatibility
 #@---------------------------------------------------
 #@ Date   : 20250214
-#@ Author : Phil Randal and Claudio Kuenzler
-#@ Reason : Update to newer pywbem exception call
+#@ Author : Claudio Kuenzler
+#@ Reason : Update to newer pywbem exception call, handle HTTPError
 #@---------------------------------------------------
 
 import sys
@@ -752,7 +752,7 @@ else:
   verboseoutput("pywbem is older than 1.0.0")
   import pywbem.cim_operations as PywbemCimOperations
   import pywbem.cim_http as PywbemCimHttp
-  import pywbem._exceptions as PywbemExceptions
+  import pywbem.exceptions as PywbemExceptions
 
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
@@ -781,6 +781,10 @@ if vendor=='auto':
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except PywbemExceptions.ConnectionError as args:
+    GlobalStatus = ExitUnknown
+    print("UNKNOWN: {}".format(args))
+    sys.exit (GlobalStatus)
+  except PywbemExceptions.HTTPError as args:
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
@@ -816,6 +820,10 @@ for classe in ClassesToCheck :
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
   except PywbemExceptions.ConnectionError as args:
+    GlobalStatus = ExitUnknown
+    print("UNKNOWN: {}".format(args))
+    sys.exit (GlobalStatus)
+  except PywbemExceptions.HTTPError as args:
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
