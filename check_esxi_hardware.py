@@ -309,6 +309,7 @@ import pywbem
 import re
 import json
 from optparse import OptionParser,OptionGroup
+from packaging.version import Version
 
 version = '20250214'
 
@@ -741,6 +742,16 @@ verboseoutput("Found pywbem version "+pywbemversion)
 verboseoutput("Connection to "+hosturl)
 wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
+# Backward compatibility for pywbem <= 1.0.0
+if Version(pywbemversion) >= Version("1.0.0"):
+  verboseoutput("pywbem is 1.0.0 or newer")
+  import pywbem._cim_operations as PywbemCimOperations
+  import pywbem._cim_http as PywbemCimHttp
+else:
+  verboseoutput("pywbem is older than 1.0.0")
+  import pywbem.cim_operations as PywbemCimOperations
+  import pywbem.cim_http as PywbemCimHttp
+
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
   signal.signal(signal.SIGALRM, handler)
@@ -758,7 +769,7 @@ ExitMsg = ""
 if vendor=='auto':
   try:
     c=wbemclient.EnumerateInstances('CIM_Chassis')
-  except pywbem._cim_operations.CIMError as args:
+  except PywbemCimOperations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
       print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
@@ -771,7 +782,7 @@ if vendor=='auto':
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
-  except pywbem._cim_http.AuthError as arg:
+  except PywbemCimHttp.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
     print("UNKNOWN: Authentication Error")
@@ -793,7 +804,7 @@ for classe in ClassesToCheck :
   verboseoutput("Check classe "+classe)
   try:
     instance_list = wbemclient.EnumerateInstances(classe)
-  except pywbem._cim_operations.CIMError as args:
+  except PywbemCimOperations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
       print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
@@ -806,7 +817,7 @@ for classe in ClassesToCheck :
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
-  except pywbem._cim_http.AuthError as arg:
+  except PywbemCimHttp.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
     print("UNKNOWN: Authentication Error")
