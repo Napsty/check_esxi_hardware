@@ -300,7 +300,7 @@
 #@---------------------------------------------------
 #@ Date   : 20250214
 #@ Author : Claudio Kuenzler
-#@ Reason : Update to newer pywbem exception call, handle HTTPError
+#@ Reason : Update to newer pywbem exception call, catch HTTPError
 #@---------------------------------------------------
 
 import sys
@@ -742,7 +742,7 @@ verboseoutput("Found pywbem version "+pywbemversion)
 verboseoutput("Connection to "+hosturl)
 wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
-# Backward compatibility for pywbem <= 1.0.0
+# Backward compatibility for older pywbem exceptions, big thanks to Claire M.!
 if Version(pywbemversion) >= Version("1.0.0"):
   verboseoutput("pywbem is 1.0.0 or newer")
   import pywbem._cim_operations as PywbemCimOperations
