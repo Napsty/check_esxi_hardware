@@ -27,7 +27,7 @@
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
 # Copyright (c) 2011 Carsten Schoene
-# Copyright (c) 2011-2012,2025 Phil Randal
+# Copyright (c) 2011-2012 Phil Randal
 # Copyright (c) 2011 Fredrik Aslund
 # Copyright (c) 2011 Bertrand Jomin
 # Copyright (c) 2011 Ian Chard
@@ -301,6 +301,7 @@
 #@ Date   : 20250214
 #@ Author : Claudio Kuenzler
 #@ Reason : Update to newer pywbem exception call, catch HTTPError
+#@ Attn   : Requires 'packaging' Python module from now on!
 #@---------------------------------------------------
 
 import sys
