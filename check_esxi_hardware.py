@@ -22,7 +22,7 @@
 # Copyright (c) 2008 David Ligeret
 # Copyright (c) 2009 Joshua Daniel Franklin
 # Copyright (c) 2010 Branden Schneider
-# Copyright (c) 2010-2024 Claudio Kuenzler
+# Copyright (c) 2010-2025 Claudio Kuenzler
 # Copyright (c) 2010 Samir Ibradzic
 # Copyright (c) 2010 Aaron Rogers
 # Copyright (c) 2011 Ludovic Hutin
@@ -298,6 +298,11 @@
 #           Remove python2 compatibility
 #           Remove pywbem 0.7.0 compatibility
 #@---------------------------------------------------
+#@ Date   : 20250221
+#@ Author : Claudio Kuenzler
+#@ Reason : Update to newer pywbem exception call, catch HTTPError
+#@ Attn   : Requires 'packaging' Python module from now on!
+#@---------------------------------------------------
 
 import sys
 import time
@@ -305,8 +310,9 @@ import pywbem
 import re
 import json
 from optparse import OptionParser,OptionGroup
+from packaging.version import Version
 
-version = '20241129'
+version = '20250221'
 
 NS = 'root/cimv2'
 hosturl = ''
@@ -737,6 +743,18 @@ verboseoutput("Found pywbem version "+pywbemversion)
 verboseoutput("Connection to "+hosturl)
 wbemclient = pywbem.WBEMConnection(hosturl, (user,password), NS, no_verification=True)
 
+# Backward compatibility for older pywbem exceptions, big thanks to Claire M.!
+if Version(pywbemversion) >= Version("1.0.0"):
+  verboseoutput("pywbem is 1.0.0 or newer")
+  import pywbem._cim_operations as PywbemCimOperations
+  import pywbem._cim_http as PywbemCimHttp
+  import pywbem._exceptions as PywbemExceptions
+else:
+  verboseoutput("pywbem is older than 1.0.0")
+  import pywbem.cim_operations as PywbemCimOperations
+  import pywbem.cim_http as PywbemCimHttp
+  import pywbem.exceptions as PywbemExceptions
+
 # Add a timeout for the script. When using with Nagios, the Nagios timeout cannot be < than plugin timeout.
 if on_windows == False and timeout > 0:
   signal.signal(signal.SIGALRM, handler)
@@ -754,7 +772,7 @@ ExitMsg = ""
 if vendor=='auto':
   try:
     c=wbemclient.EnumerateInstances('CIM_Chassis')
-  except pywbem.cim_operations.CIMError as args:
+  except PywbemCimOperations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
       print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
@@ -763,11 +781,15 @@ if vendor=='auto':
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
-  except pywbem._exceptions.ConnectionError as args:
+  except PywbemExceptions.ConnectionError as args:
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
-  except pywbem.cim_http.AuthError as arg:
+  except PywbemExceptions.HTTPError as args:
+    GlobalStatus = ExitUnknown
+    print("UNKNOWN: {}".format(args))
+    sys.exit (GlobalStatus)
+  except PywbemCimHttp.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
     print("UNKNOWN: Authentication Error")
@@ -789,7 +811,7 @@ for classe in ClassesToCheck :
   verboseoutput("Check classe "+classe)
   try:
     instance_list = wbemclient.EnumerateInstances(classe)
-  except pywbem._cim_operations.CIMError as args:
+  except PywbemCimOperations.CIMError as args:
     if ( args[1].find('Socket error') >= 0 ):
       print("UNKNOWN: {}".format(args))
       sys.exit (ExitUnknown)
@@ -798,11 +820,15 @@ for classe in ClassesToCheck :
       sys.exit (ExitUnknown)
     else:
       verboseoutput("Unknown CIM Error: %s" % args)
-  except pywbem._exceptions.ConnectionError as args:
+  except PywbemExceptions.ConnectionError as args:
     GlobalStatus = ExitUnknown
     print("UNKNOWN: {}".format(args))
     sys.exit (GlobalStatus)
-  except pywbem._cim_http.AuthError as arg:
+  except PywbemExceptions.HTTPError as args:
+    GlobalStatus = ExitUnknown
+    print("UNKNOWN: {}".format(args))
+    sys.exit (GlobalStatus)
+  except PywbemCimHttp.AuthError as arg:
     verboseoutput("Global exit set to UNKNOWN")
     GlobalStatus = ExitUnknown
     print("UNKNOWN: Authentication Error")
