@@ -298,7 +298,7 @@
 #           Remove python2 compatibility
 #           Remove pywbem 0.7.0 compatibility
 #@---------------------------------------------------
-#@ Date   : 20250214
+#@ Date   : 20250221
 #@ Author : Claudio Kuenzler
 #@ Reason : Update to newer pywbem exception call, catch HTTPError
 #@ Attn   : Requires 'packaging' Python module from now on!
@@ -312,7 +312,7 @@ import json
 from optparse import OptionParser,OptionGroup
 from packaging.version import Version
 
-version = '20250214'
+version = '20250221'
 
 NS = 'root/cimv2'
 hosturl = ''
