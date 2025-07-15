@@ -607,14 +607,14 @@ def getopts() :
   if len(sys.argv) < 2:
     print("no parameters specified\n")
     parser.print_help()
-    sys.exit(-1)
+    sys.exit(3)
   # if first argument starts with 'https://' we have old-style parameters, so handle in old way
   if re.match("https://",sys.argv[1]):
     # check input arguments
     if len(sys.argv) < 5:
       print("too few parameters\n")
       parser.print_help()
-      sys.exit(-1)
+      sys.exit(3)
     if len(sys.argv) > 5 :
       if sys.argv[5] == "verbose" :
         verbose = True
@@ -632,7 +632,7 @@ def getopts() :
       if not options.__dict__[m]:
         print("mandatory option '" + m + "' not defined. read usage in help.\n")
         parser.print_help()
-        sys.exit(-1)
+        sys.exit(3)
 
     hostname=options.host.lower()
     # if user has put "https://" in front of hostname out of habit, do the right thing
