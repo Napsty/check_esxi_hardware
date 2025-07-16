@@ -36,7 +36,7 @@
 # Copyright (c) 2015 Andreas Gottwald
 # Copyright (c) 2015 Stanislav German-Evtushenko
 # Copyright (c) 2015 Stefan Roos
-# Copyright (c) 2018 Peter Newman
+# Copyright (c) 2018,2025 Peter Newman
 # Copyright (c) 2020 Luca Berra
 # Copyright (c) 2022 Marco Markgraf
 #
@@ -50,7 +50,7 @@
 #   https://www.claudiokuenzler.com/monitoring-plugins/check_esxi_hardware.php
 #
 #@---------------------------------------------------
-#@ History
+#@ History / ChangeLog
 #@---------------------------------------------------
 #@ Date   : 20080820
 #@ Author : David Ligeret
@@ -303,6 +303,10 @@
 #@ Reason : Update to newer pywbem exception call, catch HTTPError
 #@ Attn   : Requires 'packaging' Python module from now on!
 #@---------------------------------------------------
+#@ Date   : 20250716
+#@ Author : Peter Newman
+#@ Reason : Adjust exit code -1 to 3 (Nagios UNKNOWN)
+#@---------------------------------------------------
 
 import sys
 import time
@@ -312,7 +316,7 @@ import json
 from optparse import OptionParser,OptionGroup
 from packaging.version import Version
 
-version = '20250221'
+version = '20250716'
 
 NS = 'root/cimv2'
 hosturl = ''
